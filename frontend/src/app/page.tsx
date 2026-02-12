@@ -3,8 +3,6 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react";
 import i18next, { languageOptions } from "@/lib/i18n";
 import programs from "@/data/programs.json";
@@ -178,6 +176,7 @@ const admissionSteps = [
 export default function Home() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const heroImageRef = useRef<HTMLDivElement | null>(null);
+  const statsSectionRef = useRef<HTMLElement | null>(null);
   const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const statValueRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeFolderId, setActiveFolderId] = useState(academicFolders[0].id);
@@ -203,21 +202,32 @@ export default function Home() {
 
   const t = useMemo(() => (key: string) => i18next.t(key), [language]);
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem("theme");
-    if (stored === "dark" || stored === "light") {
-      setTheme(stored);
-      return;
-    }
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-    }
-  }, []);
+  const handleThemeToggle = async () => {
+    const next = theme === "dark" ? "light" : "dark";
+    const { applyTheme } = await import("@/lib/theme");
+    applyTheme(next);
+    setTheme(next);
+  };
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem("theme");
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const next =
+      stored === "dark" || stored === "light"
+        ? stored
+        : prefersDark
+          ? "dark"
+          : "light";
+    setTheme(next);
+    if (next === "dark") {
+      import("@/lib/theme").then(({ applyTheme }) => applyTheme("dark"));
+    } else {
+      document.documentElement.dataset.theme = "light";
+    }
+  }, []);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("language");
@@ -255,62 +265,83 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const context = gsap.context(() => {
-      if (heroImageRef.current) {
-        gsap.to(heroImageRef.current, {
-          yPercent: 18,
-          ease: "none",
-          scrollTrigger: {
-            trigger: heroImageRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
+    if (!statsSectionRef.current) return;
+    let context: { revert: () => void } | null = null;
+    const target = statsSectionRef.current;
 
-      bubbleRefs.current.forEach((bubble) => {
-        if (!bubble) return;
-        gsap.fromTo(
-          bubble,
-          { opacity: 0, scale: 0.85, y: 20 },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 1.1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: bubble,
-              start: "top 80%",
-              once: true,
-            },
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+
+        const gsapModule = await import("gsap");
+        const scrollTriggerModule = await import("gsap/ScrollTrigger");
+        const gsap = gsapModule.gsap;
+        const ScrollTrigger = scrollTriggerModule.ScrollTrigger;
+
+        gsap.registerPlugin(ScrollTrigger);
+        context = gsap.context(() => {
+          if (heroImageRef.current) {
+            gsap.to(heroImageRef.current, {
+              yPercent: 18,
+              ease: "none",
+              scrollTrigger: {
+                trigger: heroImageRef.current,
+                start: "top top",
+                end: "bottom top",
+                scrub: true,
+              },
+            });
           }
-        );
-      });
 
-      statValueRefs.current.forEach((el, index) => {
-        if (!el) return;
-        const target = stats[index]?.value ?? 0;
-        const counter = { val: 0 };
-        gsap.to(counter, {
-          val: target,
-          duration: 2.1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            once: true,
-          },
-          onUpdate: () => {
-            el.textContent = Math.floor(counter.val).toLocaleString("ar-LY");
-          },
-        });
-      });
-    }, rootRef);
+          bubbleRefs.current.forEach((bubble) => {
+            if (!bubble) return;
+            gsap.fromTo(
+              bubble,
+              { opacity: 0, scale: 0.85, y: 20 },
+              {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                duration: 1.1,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: bubble,
+                  start: "top 80%",
+                  once: true,
+                },
+              }
+            );
+          });
 
-    return () => context.revert();
+          statValueRefs.current.forEach((el, index) => {
+            if (!el) return;
+            const targetValue = stats[index]?.value ?? 0;
+            const counter = { val: 0 };
+            gsap.to(counter, {
+              val: targetValue,
+              duration: 2.1,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 85%",
+                once: true,
+              },
+              onUpdate: () => {
+                el.textContent = Math.floor(counter.val).toLocaleString("ar-LY");
+              },
+            });
+          });
+        }, rootRef);
+      },
+      { rootMargin: "0px 0px -20% 0px" }
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+      context?.revert();
+    };
   }, []);
 
   useEffect(() => {
@@ -374,6 +405,8 @@ export default function Home() {
                   width={32}
                   height={32}
                   loading="lazy"
+                  sizes="48px"
+                  quality={80}
                 />
               </div>
               <div className="text-center">
@@ -387,7 +420,11 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
+              <label htmlFor="language-select" className="sr-only">
+                Language
+              </label>
               <select
+                id="language-select"
                 value={language}
                 onChange={(event) => setLanguage(event.target.value)}
                 className="input-surface rounded-full px-3 py-2 text-xs font-medium text-[var(--text-primary)]"
@@ -400,9 +437,7 @@ export default function Home() {
               </select>
               <button
                 type="button"
-                onClick={() =>
-                  setTheme((prev) => (prev === "dark" ? "light" : "dark"))
-                }
+                onClick={handleThemeToggle}
                 className="glow-hover rounded-full border border-[var(--gold)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-primary)]"
               >
                 {theme === "dark" ? "Light" : "Dark"}
@@ -438,7 +473,8 @@ export default function Home() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 1100px"
-                  loading="lazy"
+                  priority
+                  quality={72}
                 />
               </div>
               <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.86),_rgba(0,31,63,0.35),_rgba(0,31,63,0.92))]" />
@@ -517,6 +553,8 @@ export default function Home() {
                   width={140}
                   height={48}
                   loading="lazy"
+                  sizes="140px"
+                  quality={80}
                 />
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
@@ -727,7 +765,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section id="stats" className="py-16 md:py-20">
+        <section id="stats" ref={statsSectionRef} className="py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -853,6 +891,7 @@ export default function Home() {
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
                             loading="lazy"
+                            quality={65}
                           />
                         </motion.div>
                         <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.6),_rgba(0,31,63,0.1),_rgba(0,31,63,0.7))]" />
@@ -923,6 +962,7 @@ export default function Home() {
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                           loading="lazy"
+                          quality={65}
                         />
                       ) : null}
                       <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.55),_rgba(0,31,63,0.1),_rgba(0,31,63,0.65))]" />
@@ -1131,19 +1171,28 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <a
               className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
-              href="#"
+              href="https://facebook.com"
+              aria-label="Facebook"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Facebook className="h-4 w-4" />
             </a>
             <a
               className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
-              href="#"
+              href="https://instagram.com"
+              aria-label="Instagram"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Instagram className="h-4 w-4" />
             </a>
             <a
               className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
-              href="#"
+              href="https://youtube.com"
+              aria-label="YouTube"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <Youtube className="h-4 w-4" />
             </a>

@@ -13,36 +13,42 @@ const amiri = Amiri({
   variable: "--font-display",
   subsets: ["arabic", "latin"],
   weight: ["400", "700"],
+  display: "swap",
 });
 
 const tajawal = Tajawal({
   variable: "--font-body",
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "700"],
+  display: "swap",
 });
 
 const notoSans = Noto_Sans({
   variable: "--font-latin",
   subsets: ["latin", "cyrillic"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 const notoArabic = Noto_Sans_Arabic({
   variable: "--font-arabic",
   subsets: ["arabic"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 const notoSC = Noto_Sans_SC({
   variable: "--font-cjk",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 const notoJP = Noto_Sans_JP({
   variable: "--font-jp",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
