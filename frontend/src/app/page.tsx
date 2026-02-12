@@ -177,6 +177,7 @@ export default function Home() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const heroImageRef = useRef<HTMLDivElement | null>(null);
   const statsSectionRef = useRef<HTMLElement | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const statValueRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeFolderId, setActiveFolderId] = useState(academicFolders[0].id);
@@ -186,6 +187,7 @@ export default function Home() {
   const [stepIndex, setStepIndex] = useState(0);
   const [language, setLanguage] = useState(i18next.language || "ar");
   const [theme, setTheme] = useState("light");
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const activeFolder = useMemo(
     () => academicFolders.find((folder) => folder.id === activeFolderId),
@@ -262,6 +264,20 @@ export default function Home() {
       setFootballIndex((prev) => (prev + 1) % footballSlides.length);
     }, 5200);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!mapSectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setIsMapReady(true);
+        observer.disconnect();
+      },
+      { rootMargin: "0px 0px -20% 0px" }
+    );
+    observer.observe(mapSectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -474,7 +490,7 @@ export default function Home() {
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 1100px"
                   priority
-                  quality={72}
+                  quality={60}
                 />
               </div>
               <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.86),_rgba(0,31,63,0.35),_rgba(0,31,63,0.92))]" />
@@ -891,7 +907,7 @@ export default function Home() {
                             className="object-cover"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
                             loading="lazy"
-                            quality={65}
+                            quality={55}
                           />
                         </motion.div>
                         <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.6),_rgba(0,31,63,0.1),_rgba(0,31,63,0.7))]" />
@@ -962,7 +978,7 @@ export default function Home() {
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
                           loading="lazy"
-                          quality={65}
+                          quality={55}
                         />
                       ) : null}
                       <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.55),_rgba(0,31,63,0.1),_rgba(0,31,63,0.65))]" />
@@ -1115,7 +1131,7 @@ export default function Home() {
         </section>
 
         <section id="map" className="py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div ref={mapSectionRef} className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
                 {t("sections.map")}
@@ -1130,18 +1146,24 @@ export default function Home() {
 
             <div className="glass-card mt-8 rounded-[32px] p-4 sm:p-6">
               <div className="overflow-hidden rounded-3xl">
-                <iframe
-                  title="Al-Hadhra University Location"
-                  src="https://maps.google.com/maps?q=Tripoli%20Dahmani&t=m&z=13&output=embed"
-                  className="h-80 w-full border-0"
-                  loading="lazy"
-                  style={{
-                    filter:
-                      theme === "dark"
-                        ? "grayscale(0.3) invert(0.9) hue-rotate(180deg)"
-                        : "grayscale(0.15)",
-                  }}
-                />
+                {isMapReady ? (
+                  <iframe
+                    title="Al-Hadhra University Location"
+                    src="https://maps.google.com/maps?q=Tripoli%20Dahmani&t=m&z=13&output=embed"
+                    className="h-80 w-full border-0"
+                    loading="lazy"
+                    style={{
+                      filter:
+                        theme === "dark"
+                          ? "grayscale(0.3) invert(0.9) hue-rotate(180deg)"
+                          : "grayscale(0.15)",
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-80 w-full items-center justify-center bg-[rgba(197,160,89,0.08)] text-sm text-muted">
+                    يتم تحميل الخريطة عند الاقتراب من القسم
+                  </div>
+                )}
               </div>
               <div className="mt-4 flex items-center gap-3 text-sm text-muted">
                 <MapPin className="h-4 w-4 text-[var(--gold)]" />
