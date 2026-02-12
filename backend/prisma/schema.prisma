@@ -1,0 +1,121 @@
+﻿generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  STAFF
+}
+
+enum AppStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Users Table: Central authentication
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  fullName      String
+  role          Role      @default(STUDENT)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  studentProfile Student?
+  announcements  Announcement[]
+
+  @@map("users")
+}
+
+// Departments Table: (IT, Law, Interior Design, etc.)
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String?  @unique
+  description String?
+
+  students    Student[]
+  courses     Course[]
+
+  @@map("departments")
+}
+
+// Students Table
+model Student {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  studentNumber  String   @unique
+  departmentId   String?
+  enrollmentYear Int
+  status         String   @default("ACTIVE")
+
+  user           User        @relation(fields: [userId], references: [id])
+  department     Department? @relation(fields: [departmentId], references: [id])
+  enrollments    Enrollment[]
+
+  @@map("students")
+}
+
+// Courses Table
+model Course {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  creditHours  Int
+  departmentId String
+
+  department   Department @relation(fields: [departmentId], references: [id])
+  enrollments  Enrollment[]
+
+  @@map("courses")
+}
+
+// Enrollments Table (Many-to-Many resolution)
+model Enrollment {
+  id           String   @id @default(uuid())
+  studentId    String
+  courseId     String
+  semester     String
+  academicYear String
+  grade        Float?
+
+  student      Student @relation(fields: [studentId], references: [id])
+  course       Course  @relation(fields: [courseId], references: [id])
+
+  @@map("enrollments")
+}
+
+// Admissions Table (Public Applications)
+model AdmissionApplication {
+  id                  String    @id @default(uuid())
+  fullName            String
+  email               String
+  nationalId          String    @unique
+  departmentRequested String
+  status              AppStatus @default(PENDING)
+  submittedAt         DateTime  @default(now())
+
+  @@map("admissions_applications")
+}
+
+// Announcements Table
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdBy String
+  createdAt DateTime @default(now())
+
+  author    User     @relation(fields: [createdBy], references: [id])
+
+  @@map("announcements")
+}
