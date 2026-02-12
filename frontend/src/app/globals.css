@@ -146,6 +146,11 @@ html[data-theme="dark"] .bubble {
   box-shadow: 0 20px 55px rgba(0, 0, 0, 0.45);
 }
 
+.section-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: 800px;
+}
+
 ::selection {
   background: rgba(197, 160, 89, 0.3);
 }

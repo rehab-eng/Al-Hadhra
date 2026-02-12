@@ -546,7 +546,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 md:py-20">
+        <section className="section-lazy py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -616,7 +616,7 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-        <section id="academics" className="py-16 md:py-20">
+        <section id="academics" className="section-lazy py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -702,7 +702,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="programs" className="py-16 md:py-20">
+        <section id="programs" className="section-lazy py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -781,7 +781,11 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section id="stats" ref={statsSectionRef} className="py-16 md:py-20">
+        <section
+          id="stats"
+          ref={statsSectionRef}
+          className="section-lazy py-16 md:py-20"
+        >
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -863,7 +867,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="hub" className="py-16 md:py-20">
+        <section id="hub" className="section-lazy py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -905,7 +909,7 @@ export default function Home() {
                             alt={card.title}
                             fill
                             className="object-cover"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 700px"
                             loading="lazy"
                             quality={55}
                           />
@@ -976,7 +980,7 @@ export default function Home() {
                           alt={card.title}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 420px"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
                           loading="lazy"
                           quality={55}
                         />
@@ -1011,7 +1015,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <section id="admissions" className="py-16 md:py-20">
+        <section id="admissions" className="section-lazy py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="glass-card rounded-[28px] p-8 sm:p-10">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
@@ -1130,7 +1134,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="map" className="py-16 md:py-20">
+        <section id="map" className="section-lazy py-16 md:py-20">
           <div ref={mapSectionRef} className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
