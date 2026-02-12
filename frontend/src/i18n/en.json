@@ -1,0 +1,215 @@
+{
+  "brand": {
+    "name": "Al-Hadhra University",
+    "tagline": "Global Portal",
+    "logoAlt": "Al-Hadhra University Logo"
+  },
+  "nav": {
+    "home": "Home",
+    "academics": "Academics",
+    "programs": "Programs",
+    "hub": "Al-Hadhra Hub",
+    "admissions": "Admissions",
+    "location": "Location",
+    "menu": "Menu",
+    "close": "Close menu",
+    "language": "Choose language"
+  },
+  "toggle": {
+    "dark": "Dark Mode",
+    "light": "Light Mode"
+  },
+  "hero": {
+    "tag": "Global Scale",
+    "title": "Global Digital Portal",
+    "subtitle": "for Al-Hadhra University",
+    "body": "A world-class university platform blending heritage, innovation, and a premium interactive journey.",
+    "imageAlt": "Al-Hadhra University Campus",
+    "features": [
+      "Global-grade digital infrastructure with institutional standards.",
+      "Royal identity with a premium golden glow.",
+      "Interactive experience powered by GSAP and Framer Motion."
+    ]
+  },
+  "cta": {
+    "apply": "Apply Now",
+    "explore": "Explore Programs",
+    "portal": "Student Portal",
+    "login": "Login"
+  },
+  "sections": {
+    "academics": "Smart Academic Architecture",
+    "programs": "Program Profiles",
+    "stats": "Dynamic Stats Dashboard",
+    "hub": "Culture, Sports & Community",
+    "admissions": "Smart Admissions",
+    "location": "Official Address"
+  },
+  "leadership": {
+    "title": "Vice Chancellor's Message",
+    "quote": "Al-Hadhra University is more than an academic institution; it is a beacon for building people and advancing the nation through technology and innovation.",
+    "name": "Mr. Abdulraouf Abu Jarad",
+    "role": "Vice Chancellor of Al-Hadhra University",
+    "signatureAlt": "Vice Chancellor Signature",
+    "photoAlt": "Vice Chancellor Photo"
+  },
+  "academicLeadership": {
+    "title": "Academic Leadership",
+    "body": "We are committed to world-class education grounded in research and modern technology, supported by smart admissions and a digital student gateway.",
+    "cards": [
+      {
+        "title": "Smart, phased admissions",
+        "description": "Online forms connected directly to the database."
+      },
+      {
+        "title": "Global visual identity",
+        "description": "Cinematic experience with high-resolution imagery and motion."
+      }
+    ]
+  },
+  "academics": {
+    "title": "New Academic Structure",
+    "body": "Smart folders showcase the core academic divisions, with readiness indicators and “Coming Soon” for future majors.",
+    "view": "View",
+    "status": {
+      "active": "Approved Program",
+      "coming": "Launching Soon"
+    },
+    "comingSoon": "Coming Soon"
+  },
+  "folders": {
+    "languages": {
+      "title": "Languages Division",
+      "summary": "English Language program with advanced academic and research preparation.",
+      "programs": ["English Language Program"]
+    },
+    "law": {
+      "title": "Law Division",
+      "summary": "Comprehensive law program connecting theory to practice.",
+      "programs": ["Law Program"]
+    },
+    "business": {
+      "title": "Business Division",
+      "summary": "Business Administration as the university’s core since 2001.",
+      "programs": ["Business Administration"]
+    },
+    "arts": {
+      "title": "Arts Division",
+      "summary": "Interior Design with a contemporary creative vision.",
+      "programs": ["Interior Design"]
+    },
+    "technology": {
+      "title": "Technology Division",
+      "summary": "Advanced digital specialties powering the knowledge economy.",
+      "programs": ["Computer Science Track", "Cyber Security Track"]
+    }
+  },
+  "programs": {
+    "title": "Detailed Program Profiles",
+    "body": "Accurate academic data is managed in external JSON for fast, flexible updates.",
+    "coordinator": "Coordinator",
+    "courses": "Courses",
+    "credits": "Credits",
+    "semesters": "Semesters"
+  },
+  "statsSection": {
+    "title": "Floating Data Bubbles",
+    "body": "Animated indicators reflecting the full academic ecosystem.",
+    "live": "Live"
+  },
+  "stats": {
+    "faculty": "Faculty",
+    "programs": "Programs",
+    "students": "Students",
+    "graduates": "Graduates"
+  },
+  "hub": {
+    "title": "A Vibrant Community",
+    "body": "A window into cultural, sports, and community initiatives shaping the university identity.",
+    "cards": {
+      "blood": {
+        "title": "Blood Donation Campaign",
+        "description": "Tripoli Central Blood Bank organizes a donation campaign inside Al-Hadhra University.",
+        "tag": "Giving",
+        "date": "2024-01-04"
+      },
+      "accreditation": {
+        "title": "Accreditation Pride",
+        "description": "We celebrate earning full institutional accreditation as a symbol of our global quality standards.",
+        "tag": "Achievement"
+      },
+      "bookFair": {
+        "title": "Cultural Beacon",
+        "description": "A distinguished participation in the International Book Fair, enriching our students’ knowledge.",
+        "tag": "Culture"
+      },
+      "robotics": {
+        "title": "Wolf Strike Initiative",
+        "description": "A scientific initiative to advance student skills in programming, robotics, and intelligent systems.",
+        "tag": "Technology"
+      },
+      "billiards": {
+        "title": "Billiards Championship",
+        "description": "University billiards tournament concluded with competitive spirit and sportsmanship.",
+        "tag": "Sports"
+      },
+      "football": {
+        "title": "Champions Crowned",
+        "description": "Congratulations to Commando team on their deserved title; moments capturing student spirit.",
+        "tag": "Sports"
+      },
+      "masters": {
+        "title": "Postgraduate Studies",
+        "description": "A step toward the future with accredited master’s programs in leading disciplines.",
+        "tag": "Postgraduate"
+      }
+    }
+  },
+  "carousel": {
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "admissions": {
+    "title": "Smart Admissions",
+    "body": "A multi-step interactive application modeled after leading UK universities.",
+    "tabsLabel": "Admissions steps",
+    "formTitle": "Interactive Application",
+    "stepLabel": "Step",
+    "of": "of",
+    "fields": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "program": "Requested Program",
+      "track": "Track",
+      "level": "Academic Level"
+    },
+    "reviewNotice": "By submitting, your application will be routed to the smart admissions portal with an instant email notification.",
+    "prev": "Previous",
+    "next": "Next",
+    "steps": {
+      "profile": {
+        "title": "Basic Profile",
+        "description": "Identity, email, and phone number."
+      },
+      "academic": {
+        "title": "Academic Choice",
+        "description": "Select program, track, and level."
+      },
+      "review": {
+        "title": "Final Review",
+        "description": "Review the data and submit."
+      }
+    }
+  },
+  "location": {
+    "title": "Dahmani Corner, Tripoli",
+    "body": "Official address of Al-Hadhra University for all correspondence and visits."
+  },
+  "footer": {
+    "copyright": "Al-Hadhra University © 2026",
+    "location": "Dahmani Corner, Tripoli",
+    "phone": "0213400875 - 0927700733",
+    "email": "info@alhadhra.edu.ly"
+  }
+}

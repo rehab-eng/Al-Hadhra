@@ -1,0 +1,50 @@
+[
+  {
+    "id": "computer-science",
+    "title": "Computer Science",
+    "coordinator": null,
+    "stats": { "courses": 44, "credits": 129, "semesters": 8 },
+    "highlights": [
+      "4 advanced labs for applied projects and research.",
+      "Cybersecurity track added in 2025."
+    ],
+    "tuition": "Pay per course (cash/card); payment is required to sit for exams.",
+    "careers": ["Software Development", "Data Analysis", "Digital Infrastructure"]
+  },
+  {
+    "id": "law",
+    "title": "Law",
+    "coordinator": "Prof. Huweida Abdullah Al-Tariki",
+    "stats": { "courses": 55, "credits": 125, "semesters": 8 },
+    "highlights": [
+      "Updated legal curricula aligned with Libyan and international practice.",
+      "Practical training through legal clinics and court simulations."
+    ],
+    "tuition": "Flexible semester fees with approved payment plans.",
+    "careers": ["Judiciary", "Advocacy", "Legal Consulting"]
+  },
+  {
+    "id": "english",
+    "title": "English Language",
+    "coordinator": "Prof. Eman Mustafa Kharshouf",
+    "stats": { "courses": 48, "credits": 130, "semesters": 8 },
+    "highlights": [
+      "Develop specialized language and research skills.",
+      "Prepare students for local and international job markets."
+    ],
+    "tuition": "Annual tuition with merit-based discounts.",
+    "careers": ["Translation", "Education", "International Business"]
+  },
+  {
+    "id": "business",
+    "title": "Business Administration",
+    "coordinator": "Prof. Ibtisam Al-Taher Al-Shafar",
+    "stats": { "courses": 47, "credits": 128, "semesters": 8 },
+    "highlights": [
+      "The university’s founding program since 2001.",
+      "Focus on leadership and modern entrepreneurship."
+    ],
+    "tuition": "Flexible payment system with support for top students.",
+    "careers": ["Executive Management", "Finance", "Entrepreneurship"]
+  }
+]

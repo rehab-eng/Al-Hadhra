@@ -2,10 +2,21 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Facebook,
+  Instagram,
+  Mail,
+  Menu,
+  Moon,
+  Phone,
+  Sun,
+  X,
+  Youtube,
+} from "lucide-react";
 import i18next, { languageOptions } from "@/lib/i18n";
-import programs from "@/data/programs.json";
+import programsAr from "@/data/programs.ar.json";
+import programsEn from "@/data/programs.en.json";
 
 type Program = {
   id: string;
@@ -19,18 +30,18 @@ type Program = {
 
 type AcademicFolder = {
   id: string;
-  title: string;
-  summary: string;
-  programs: { name: string; status: "active" | "coming" }[];
+  titleKey: string;
+  summaryKey: string;
+  programs: { nameKey: string; status: "active" | "coming" }[];
 };
 
 type CulturalCard = {
   id: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   image?: string;
-  date?: string;
-  tag: string;
+  dateKey?: string;
+  tagKey: string;
   isSlider?: boolean;
   images?: string[];
 };
@@ -48,35 +59,39 @@ type StatBubble = {
 const academicFolders: AcademicFolder[] = [
   {
     id: "languages",
-    title: "قسم اللغات",
-    summary: "برنامج اللغة الإنجليزية بإعداد أكاديمي وبحثي متقدم.",
-    programs: [{ name: "برنامج اللغة الإنجليزية", status: "active" }],
+    titleKey: "folders.languages.title",
+    summaryKey: "folders.languages.summary",
+    programs: [
+      { nameKey: "folders.languages.programs.0", status: "active" },
+    ],
   },
   {
     id: "law",
-    title: "قسم القانون",
-    summary: "برنامج قانوني شامل يربط المعرفة النظرية بالتطبيق العملي.",
-    programs: [{ name: "برنامج القانون", status: "active" }],
+    titleKey: "folders.law.title",
+    summaryKey: "folders.law.summary",
+    programs: [{ nameKey: "folders.law.programs.0", status: "active" }],
   },
   {
     id: "business",
-    title: "قسم الإدارة",
-    summary: "برنامج إدارة الأعمال كالنواة الأولى للجامعة منذ 2001.",
-    programs: [{ name: "برنامج إدارة الأعمال", status: "active" }],
+    titleKey: "folders.business.title",
+    summaryKey: "folders.business.summary",
+    programs: [
+      { nameKey: "folders.business.programs.0", status: "active" },
+    ],
   },
   {
     id: "arts",
-    title: "قسم الفنون",
-    summary: "تخصص التصميم الداخلي مع منظور إبداعي معاصر.",
-    programs: [{ name: "التصميم الداخلي", status: "coming" }],
+    titleKey: "folders.arts.title",
+    summaryKey: "folders.arts.summary",
+    programs: [{ nameKey: "folders.arts.programs.0", status: "coming" }],
   },
   {
     id: "technology",
-    title: "قسم التكنولوجيا",
-    summary: "تخصصات رقمية متقدمة لخدمة اقتصاد المعرفة.",
+    titleKey: "folders.technology.title",
+    summaryKey: "folders.technology.summary",
     programs: [
-      { name: "شعبة علوم الحاسوب", status: "active" },
-      { name: "شعبة الأمن السيبراني", status: "coming" },
+      { nameKey: "folders.technology.programs.0", status: "active" },
+      { nameKey: "folders.technology.programs.1", status: "coming" },
     ],
   },
 ];
@@ -97,87 +112,80 @@ const footballSlides = [
 const culturalCards: CulturalCard[] = [
   {
     id: "blood",
-    title: "حملة التبرع بالدم",
-    description:
-      "مصرف الدم المركزي طرابلس ينظم حملة للتبرع بالدم داخل جامعة الحاضرة.",
-    date: "2024-01-04",
+    titleKey: "hub.cards.blood.title",
+    descriptionKey: "hub.cards.blood.description",
+    dateKey: "hub.cards.blood.date",
     image: "/images/blood_donation.webp",
-    tag: "عطاء",
+    tagKey: "hub.cards.blood.tag",
   },
   {
     id: "accreditation",
-    title: "فخر الاعتماد",
-    description:
-      "نعتز بحصول جامعة الحاضرة على درع الاعتماد المؤسسي الكامل، تجسيداً لالتزامنا بمعايير الجودة العالمية.",
+    titleKey: "hub.cards.accreditation.title",
+    descriptionKey: "hub.cards.accreditation.description",
     image: "/images/accreditation_shield.webp",
-    tag: "إنجاز",
+    tagKey: "hub.cards.accreditation.tag",
   },
   {
     id: "book-fair",
-    title: "منارة الثقافة",
-    description:
-      "مشاركة متميزة لجامعة الحاضرة في فعاليات معرض الكتاب الدولي، تعزيزاً للقيمة المعرفية لطلابنا.",
+    titleKey: "hub.cards.bookFair.title",
+    descriptionKey: "hub.cards.bookFair.description",
     image: "/images/book_fair.webp",
-    tag: "ثقافة",
+    tagKey: "hub.cards.bookFair.tag",
   },
   {
     id: "robotics",
-    title: "مبادرة Wolf Strike",
-    description:
-      "إطلاق مبادرة علمية لتطوير مهارات الطلبة في البرمجة والروبوتات والأنظمة الذكية، لدمج الجانب الأكاديمي بالتطبيق العملي.",
+    titleKey: "hub.cards.robotics.title",
+    descriptionKey: "hub.cards.robotics.description",
     image: "/images/robotics_init.webp",
-    tag: "تقنية",
+    tagKey: "hub.cards.robotics.tag",
   },
   {
     id: "billiards",
-    title: "النشاط الرياضي (البلياردو)",
-    description:
-      "اختتام بطولة الجامعة للبلياردو وسط أجواء من المنافسة الراقية والروح الرياضية العالية.",
+    titleKey: "hub.cards.billiards.title",
+    descriptionKey: "hub.cards.billiards.description",
     image: "/images/billiards_tournament.webp",
-    tag: "رياضة",
+    tagKey: "hub.cards.billiards.tag",
   },
   {
     id: "football",
-    title: "تتويج الأبطال",
-    description:
-      "تهانينا لفريق كوماندو التتويج المستحق.. لقطات تجسد الروح الرياضية لطلبتنا وكادرنا.",
+    titleKey: "hub.cards.football.title",
+    descriptionKey: "hub.cards.football.description",
     images: footballSlides,
     isSlider: true,
-    tag: "رياضة",
+    tagKey: "hub.cards.football.tag",
   },
   {
     id: "masters",
-    title: "الدراسات العليا (الماجستير)",
-    description:
-      "خطوة نحو المستقبل.. جامعة الحاضرة تفتح آفاق البحث العلمي بإطلاق برامج الماجستير المعتمدة في تخصصات رائدة.",
+    titleKey: "hub.cards.masters.title",
+    descriptionKey: "hub.cards.masters.description",
     image: "/images/master_degree.webp",
-    tag: "دراسات عليا",
+    tagKey: "hub.cards.masters.tag",
   },
 ];
 
 const admissionSteps = [
   {
     id: "profile",
-    title: "البيانات الأساسية",
-    description: "الهوية، البريد الإلكتروني، ورقم الهاتف.",
+    titleKey: "admissions.steps.profile.title",
+    descriptionKey: "admissions.steps.profile.description",
   },
   {
     id: "academic",
-    title: "الاختيار الأكاديمي",
-    description: "تحديد البرنامج، الشعبة، والمستوى الدراسي.",
+    titleKey: "admissions.steps.academic.title",
+    descriptionKey: "admissions.steps.academic.description",
   },
   {
     id: "review",
-    title: "التأكيد النهائي",
-    description: "مراجعة البيانات وإرسال الطلب.",
+    titleKey: "admissions.steps.review.title",
+    descriptionKey: "admissions.steps.review.description",
   },
 ];
 
 export default function Home() {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const heroImageRef = useRef<HTMLDivElement | null>(null);
+  const logoRef = useRef<HTMLDivElement | null>(null);
   const statsSectionRef = useRef<HTMLElement | null>(null);
-  const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const statValueRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeFolderId, setActiveFolderId] = useState(academicFolders[0].id);
@@ -187,12 +195,19 @@ export default function Home() {
   const [stepIndex, setStepIndex] = useState(0);
   const [language, setLanguage] = useState(i18next.language || "ar");
   const [theme, setTheme] = useState("light");
-  const [isMapReady, setIsMapReady] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const activeFolder = useMemo(
     () => academicFolders.find((folder) => folder.id === activeFolderId),
     [activeFolderId]
   );
+
+  const programsData = useMemo(
+    () => (language === "ar" ? programsAr : programsEn),
+    [language]
+  );
+
+  const numberLocale = language === "ar" ? "ar-LY" : "en-US";
 
   const overlayVariants = useMemo(
     () => ({
@@ -260,6 +275,25 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!logoRef.current) return;
+    const prefersReduced =
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile =
+      window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+    if (prefersReduced || !isMobile) return;
+    import("gsap").then(({ gsap }) => {
+      if (!logoRef.current) return;
+      gsap.fromTo(
+        logoRef.current,
+        { x: -80, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.9, ease: "power3.out" }
+      );
+    });
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setFootballIndex((prev) => (prev + 1) % footballSlides.length);
     }, 5200);
@@ -267,18 +301,15 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!mapSectionRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setIsMapReady(true);
-        observer.disconnect();
-      },
-      { rootMargin: "0px 0px -20% 0px" }
-    );
-    observer.observe(mapSectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+    if (!isMenuOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (!statsSectionRef.current) return;
@@ -344,7 +375,9 @@ export default function Home() {
                 once: true,
               },
               onUpdate: () => {
-                el.textContent = Math.floor(counter.val).toLocaleString("ar-LY");
+                el.textContent = Math.floor(counter.val).toLocaleString(
+                  numberLocale
+                );
               },
             });
           });
@@ -358,7 +391,20 @@ export default function Home() {
       observer.disconnect();
       context?.revert();
     };
-  }, []);
+  }, [numberLocale]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      statValueRefs.current.forEach((el, index) => {
+        if (!el) return;
+        const current = el.textContent?.trim() ?? "";
+        if (current === "0" || current === "٠") {
+          el.textContent = stats[index].value.toLocaleString(numberLocale);
+        }
+      });
+    }, 1200);
+    return () => clearTimeout(timeout);
+  }, [numberLocale]);
 
   useEffect(() => {
     let lastScroll = window.scrollY;
@@ -391,89 +437,260 @@ export default function Home() {
         }`}
       >
         <div className="mx-auto max-w-6xl px-4 pt-4 md:px-6">
-          <div className="surface-card flex flex-col items-center gap-4 rounded-[28px] px-4 py-4 backdrop-blur-md md:flex-row md:justify-between md:px-6">
-            <nav className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium sm:text-sm md:justify-start">
-              <a className="hover:text-[var(--gold)]" href="#home">
-                {t("nav.home")}
-              </a>
-              <a className="hover:text-[var(--gold)]" href="#academics">
-                {t("nav.academics")}
-              </a>
-              <a className="hover:text-[var(--gold)]" href="#programs">
-                {t("nav.programs")}
-              </a>
-              <a className="hover:text-[var(--gold)]" href="#hub">
-                {t("nav.hub")}
-              </a>
-              <a className="hover:text-[var(--gold)]" href="#admissions">
-                {t("nav.admissions")}
-              </a>
-              <a className="hover:text-[var(--gold)]" href="#map">
-                {t("nav.map")}
-              </a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
-                <Image
-                  src="/images/logo.webp"
-                  alt="شعار جامعة الحاضرة"
-                  width={32}
-                  height={32}
-                  loading="lazy"
-                  sizes="48px"
-                  quality={80}
-                />
-              </div>
-              <div className="text-center">
-                <p className="font-display text-base sm:text-lg">
-                  جامعة الحاضرة
-                </p>
-                <p className="text-[11px] text-muted sm:text-xs">
-                  بوابة عالمية
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <label htmlFor="language-select" className="sr-only">
-                Language
-              </label>
-              <select
-                id="language-select"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value)}
-                className="input-surface rounded-full px-3 py-2 text-xs font-medium text-[var(--text-primary)]"
-              >
-                {languageOptions.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
+          <div className="md:hidden">
+            <div className="surface-card flex items-center justify-between rounded-[24px] px-4 py-3 backdrop-blur-md">
               <button
                 type="button"
-                onClick={handleThemeToggle}
-                className="glow-hover rounded-full border border-[var(--gold)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-primary)]"
+                aria-label={t("nav.menu")}
+                onClick={() => setIsMenuOpen(true)}
+                className="glow-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--gold)]/30 text-[var(--text-primary)]"
               >
-                {theme === "dark" ? "Light" : "Dark"}
+                <Menu className="h-5 w-5" />
               </button>
-              <a
-                className="rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
-                href="#admissions"
-              >
-                {t("cta.portal")}
-              </a>
-              <a
-                className="rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-medium text-white hover:bg-[#0b2a4a] sm:text-sm glow-gold"
-                href="#admissions"
-              >
-                {t("cta.login")}
-              </a>
+
+              <div ref={logoRef} className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
+                  <Image
+                    src="/images/logo.webp"
+                    alt={t("brand.logoAlt")}
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                    sizes="40px"
+                    quality={80}
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-display text-sm">
+                    {t("brand.name")}
+                  </p>
+                  <p className="text-[10px] text-muted">{t("brand.tagline")}</p>
+                </div>
+              </div>
+
+              <div className="h-11 w-11" />
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="surface-card flex flex-col items-center gap-4 rounded-[28px] px-4 py-4 backdrop-blur-md md:flex-row md:justify-between md:px-6">
+              <nav className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium sm:text-sm md:justify-start">
+                <a className="hover:text-[var(--gold)]" href="#home">
+                  {t("nav.home")}
+                </a>
+                <a className="hover:text-[var(--gold)]" href="#academics">
+                  {t("nav.academics")}
+                </a>
+                <a className="hover:text-[var(--gold)]" href="#programs">
+                  {t("nav.programs")}
+                </a>
+                <a className="hover:text-[var(--gold)]" href="#hub">
+                  {t("nav.hub")}
+                </a>
+                <a className="hover:text-[var(--gold)]" href="#admissions">
+                  {t("nav.admissions")}
+                </a>
+                <a className="hover:text-[var(--gold)]" href="#location">
+                  {t("nav.location")}
+                </a>
+              </nav>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
+                  <Image
+                    src="/images/logo.webp"
+                    alt={t("brand.logoAlt")}
+                    width={32}
+                    height={32}
+                    loading="lazy"
+                    sizes="48px"
+                    quality={80}
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-display text-base sm:text-lg">
+                    {t("brand.name")}
+                  </p>
+                  <p className="text-[11px] text-muted sm:text-xs">
+                    {t("brand.tagline")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <label htmlFor="language-select" className="sr-only">
+                  Language
+                </label>
+                <select
+                  id="language-select"
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  className="input-surface min-h-[44px] rounded-full px-3 py-2 text-xs font-medium text-[var(--text-primary)]"
+                >
+                  {languageOptions.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleThemeToggle}
+                  className="glow-hover min-h-[44px] rounded-full border border-[var(--gold)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-primary)]"
+                >
+                  {theme === "dark" ? t("toggle.light") : t("toggle.dark")}
+                </button>
+                <a
+                  className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
+                  href="#admissions"
+                >
+                  {t("cta.portal")}
+                </a>
+                <a
+                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-medium text-white hover:bg-[#0b2a4a] sm:text-sm glow-gold"
+                  href="#admissions"
+                >
+                  {t("cta.login")}
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </header>
+
+      <AnimatePresence>
+        {isMenuOpen ? (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <button
+              type="button"
+              aria-label={t("nav.close")}
+              onClick={() => setIsMenuOpen(false)}
+              className="absolute inset-0 bg-black/40"
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+              className="glass-card absolute right-0 top-0 flex h-full w-[86%] max-w-sm flex-col gap-6 rounded-l-[32px] p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
+                    <Image
+                      src="/images/logo.webp"
+                      alt={t("brand.logoAlt")}
+                      width={28}
+                      height={28}
+                      loading="lazy"
+                      sizes="40px"
+                      quality={80}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {t("brand.name")}
+                    </p>
+                    <p className="text-[11px] text-muted">
+                      {t("brand.tagline")}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="glow-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--gold)]/30"
+                >
+                  <X className="h-5 w-5 text-[var(--text-primary)]" />
+                </button>
+              </div>
+
+              <nav className="flex flex-col gap-3 text-sm font-medium">
+                {[
+                  { href: "#home", label: t("nav.home") },
+                  { href: "#academics", label: t("nav.academics") },
+                  { href: "#programs", label: t("nav.programs") },
+                  { href: "#hub", label: t("nav.hub") },
+                  { href: "#admissions", label: t("nav.admissions") },
+                  { href: "#location", label: t("nav.location") },
+                ].map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="surface-card min-h-[44px] rounded-2xl px-4 py-3 text-[var(--text-primary)]"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleThemeToggle}
+                  className="glow-hover flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full border border-[var(--gold)]/40 px-4 text-sm font-semibold text-[var(--text-primary)]"
+                >
+                  {theme === "dark" ? (
+                    <>
+                      <Sun className="h-4 w-4" />
+                      {t("toggle.light")}
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4" />
+                      {t("toggle.dark")}
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="language-select-mobile"
+                  className="mb-2 block text-xs font-semibold text-[var(--text-primary)]"
+                >
+                  {t("nav.language")}
+                </label>
+                <select
+                  id="language-select-mobile"
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  className="input-surface min-h-[44px] w-full rounded-2xl px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+                >
+                  {languageOptions.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid gap-3">
+                <a
+                  href="#admissions"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-3 text-center text-sm font-semibold text-[var(--text-primary)]"
+                >
+                  {t("cta.portal")}
+                </a>
+                <a
+                  href="#admissions"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-3 text-center text-sm font-semibold text-white glow-gold"
+                >
+                  {t("cta.login")}
+                </a>
+              </div>
+            </motion.aside>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <main className="relative z-10">
         <section id="home" className="pt-28 md:pt-32">
@@ -485,7 +702,7 @@ export default function Home() {
               >
                 <Image
                   src="/images/campus.webp"
-                  alt="حرم جامعة الحاضرة"
+                  alt={t("hero.imageAlt")}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 1100px"
@@ -517,13 +734,13 @@ export default function Home() {
                   <div className="mt-8 flex flex-wrap gap-3">
                     <a
                       href="#admissions"
-                      className="rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[var(--brand)] sm:text-sm"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-[var(--gold)] px-6 py-3 text-xs font-semibold text-[var(--brand)] sm:text-sm"
                     >
                       {t("cta.apply")}
                     </a>
                     <a
                       href="#programs"
-                      className="rounded-full border border-white/50 px-6 py-3 text-xs font-semibold text-white hover:border-[var(--gold)] sm:text-sm"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/50 px-6 py-3 text-xs font-semibold text-white hover:border-[var(--gold)] sm:text-sm"
                     >
                       {t("cta.explore")}
                     </a>
@@ -532,13 +749,13 @@ export default function Home() {
 
                 <div className="mt-10 grid gap-3 text-xs text-white/80 sm:grid-cols-2 sm:text-sm md:grid-cols-3">
                   <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                    بنية رقمية عالمية بمعايير مؤسسية.
+                    {t("hero.features.0")}
                   </div>
                   <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                    هوية ملكية بتوهج ذهبي فخم.
+                    {t("hero.features.1")}
                   </div>
                   <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
-                    تجربة تفاعلية مدعومة بـ GSAP و Framer Motion.
+                    {t("hero.features.2")}
                   </div>
                 </div>
               </div>
@@ -556,17 +773,16 @@ export default function Home() {
               className="glass-card rounded-[28px] p-8 sm:p-10"
             >
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
-                كلمة وكيل الجامعة
+                {t("leadership.title")}
               </p>
               <blockquote className="mt-5 border-s-4 border-[var(--gold)] ps-5 text-lg leading-8 text-[var(--text-primary)] sm:text-xl">
-                جامعة الحاضرة ليست مجرد صرح تعليمي، بل هي منارة لبناء الإنسان
-                ونهضة الوطن عبر التكنولوجيا والابتكار.
+                {t("leadership.quote")}
               </blockquote>
               <div className="mt-6 flex items-center gap-4">
                 <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
                   <Image
                     src="/images/vice_chancellor.webp"
-                    alt="صورة وكيل الجامعة"
+                    alt={t("leadership.photoAlt")}
                     width={56}
                     height={56}
                     loading="lazy"
@@ -576,7 +792,7 @@ export default function Home() {
                 </div>
                 <Image
                   src="/images/signature.webp"
-                  alt="توقيع وكيل الجامعة"
+                  alt={t("leadership.signatureAlt")}
                   width={140}
                   height={48}
                   loading="lazy"
@@ -585,9 +801,9 @@ export default function Home() {
                 />
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
-                    أ. عبد الرؤوف أبو جراد
+                    {t("leadership.name")}
                   </p>
-                  <p className="text-xs text-muted">وكيل جامعة الحاضرة</p>
+                  <p className="text-xs text-muted">{t("leadership.role")}</p>
                 </div>
               </div>
             </motion.div>
@@ -600,27 +816,26 @@ export default function Home() {
               className="glass-card rounded-[28px] p-8 sm:p-10"
             >
               <h2 className="font-display text-2xl text-[var(--text-primary)] sm:text-3xl">
-                القيادة الأكاديمية
+                {t("academicLeadership.title")}
               </h2>
               <p className="mt-4 text-sm leading-7 text-muted">
-                نلتزم بتقديم تعليم عالمي قائم على البحث والتقنيات الحديثة، مع
-                دعم كامل لمسارات القبول والتسجيل والبوابة الرقمية للطلبة.
+                {t("academicLeadership.body")}
               </p>
               <div className="mt-6 space-y-3">
                 <div className="surface-card rounded-2xl p-4">
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
-                    نظام قبول ذكي ومتدرج
+                    {t("academicLeadership.cards.0.title")}
                   </p>
                   <p className="text-xs text-muted">
-                    نماذج إلكترونية مرتبطة مباشرة بقاعدة البيانات.
+                    {t("academicLeadership.cards.0.description")}
                   </p>
                 </div>
                 <div className="surface-card rounded-2xl p-4">
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
-                    هوية بصرية عالمية
+                    {t("academicLeadership.cards.1.title")}
                   </p>
                   <p className="text-xs text-muted">
-                    تجربة سينمائية، صور عالية الدقة، وحركة مبهرة.
+                    {t("academicLeadership.cards.1.description")}
                   </p>
                 </div>
               </div>
@@ -634,11 +849,10 @@ export default function Home() {
                 {t("sections.academics")}
               </p>
               <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                الهيكل الأكاديمي الجديد
+                {t("academics.title")}
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-muted">
-                نظام المجلدات الذكية يوضح الأقسام الأكاديمية الأساسية مع
-                مؤشرات جاهزية البرنامج و"قريباً" للتخصصات المستقبلية.
+                {t("academics.body")}
               </p>
             </div>
 
@@ -662,14 +876,14 @@ export default function Home() {
                       <div className="surface-card relative z-10 rounded-3xl p-5">
                         <div className="flex items-center justify-between">
                           <h3 className="font-display text-xl text-[var(--text-primary)] sm:text-2xl">
-                            {folder.title}
+                            {t(folder.titleKey)}
                           </h3>
                           <span className="text-[11px] font-semibold text-[var(--gold)] sm:text-xs">
-                            استعراض
+                            {t("academics.view")}
                           </span>
                         </div>
                         <p className="mt-2 text-xs text-muted sm:text-sm">
-                          {folder.summary}
+                          {t(folder.summaryKey)}
                         </p>
                       </div>
                     </motion.button>
@@ -680,28 +894,30 @@ export default function Home() {
               <div className="glass-card rounded-[32px] p-6 sm:p-8">
                 <div className="flex flex-col gap-3">
                   <h3 className="font-display text-2xl text-[var(--text-primary)]">
-                    {activeFolder?.title}
+                    {activeFolder ? t(activeFolder.titleKey) : ""}
                   </h3>
-                  <p className="text-sm text-muted">{activeFolder?.summary}</p>
+                  <p className="text-sm text-muted">
+                    {activeFolder ? t(activeFolder.summaryKey) : ""}
+                  </p>
                 </div>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {activeFolder?.programs.map((program) => (
                     <div
-                      key={program.name}
+                      key={program.nameKey}
                       className="surface-card relative overflow-hidden rounded-2xl p-4"
                     >
                       <p className="text-sm font-semibold text-[var(--text-primary)]">
-                        {program.name}
+                        {t(program.nameKey)}
                       </p>
                       <p className="mt-2 text-xs text-muted">
                         {program.status === "coming"
-                          ? "برنامج قيد الإطلاق"
-                          : "برنامج معتمد"}
+                          ? t("academics.status.coming")
+                          : t("academics.status.active")}
                       </p>
                       {program.status === "coming" ? (
                         <div className="coming-soon absolute inset-0 flex items-center justify-center backdrop-blur-sm">
                           <span className="rounded-full bg-[var(--gold)] px-4 py-2 text-xs font-semibold text-[var(--brand)]">
-                            Coming Soon
+                            {t("academics.comingSoon")}
                           </span>
                         </div>
                       ) : null}
@@ -720,16 +936,15 @@ export default function Home() {
                 {t("sections.programs")}
               </p>
               <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                ملفات البرامج التفصيلية
+                {t("programs.title")}
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-muted">
-                بيانات أكاديمية دقيقة يتم إدارتها من ملف JSON خارجي لتحديث
-                المحتوى بسرعة ومرونة.
+                {t("programs.body")}
               </p>
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              {(programs as Program[]).map((program) => (
+              {(programsData as Program[]).map((program) => (
                 <motion.article
                   key={program.id}
                   layoutId={`program-${program.id}`}
@@ -741,7 +956,7 @@ export default function Home() {
                     </h3>
                     {program.coordinator ? (
                       <span className="rounded-full border border-[var(--gold)]/40 px-3 py-1 text-xs text-muted">
-                        المنسق: {program.coordinator}
+                        {t("programs.coordinator")}: {program.coordinator}
                       </span>
                     ) : null}
                   </div>
@@ -751,19 +966,21 @@ export default function Home() {
                       <span className="block text-lg font-semibold text-[var(--text-primary)]">
                         {program.stats.courses}
                       </span>
-                      <span className="text-muted">مادة</span>
+                      <span className="text-muted">{t("programs.courses")}</span>
                     </div>
                     <div className="surface-card rounded-2xl px-3 py-4">
                       <span className="block text-lg font-semibold text-[var(--text-primary)]">
                         {program.stats.credits}
                       </span>
-                      <span className="text-muted">وحدة</span>
+                      <span className="text-muted">{t("programs.credits")}</span>
                     </div>
                     <div className="surface-card rounded-2xl px-3 py-4">
                       <span className="block text-lg font-semibold text-[var(--text-primary)]">
                         {program.stats.semesters}
                       </span>
-                      <span className="text-muted">فصول</span>
+                      <span className="text-muted">
+                        {t("programs.semesters")}
+                      </span>
                     </div>
                   </div>
 
@@ -803,10 +1020,10 @@ export default function Home() {
                 {t("sections.stats")}
               </p>
               <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                دوائر البيانات العائمة
+                {t("statsSection.title")}
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-muted">
-                مؤشرات رقمية تنبض بالحركة لتعكس حجم المنظومة الأكاديمية.
+                {t("statsSection.body")}
               </p>
             </div>
 
@@ -815,7 +1032,7 @@ export default function Home() {
                 {stats.map((stat, index) => (
                   <div
                     key={stat.id}
-                    className="bubble flex items-center justify-between rounded-3xl px-6 py-5"
+                    className="bubble relative flex items-center justify-between rounded-3xl px-6 py-5"
                   >
                     <div>
                       <p className="text-xs uppercase tracking-[0.2em] text-[var(--gold)]">
@@ -825,13 +1042,13 @@ export default function Home() {
                         ref={(el) => {
                           statValueRefs.current[index] = el;
                         }}
-                        className="mt-2 block text-2xl font-semibold text-[var(--text-primary)]"
+                        className="relative z-10 mt-2 block text-2xl font-semibold text-[var(--text-primary)]"
                       >
                         0
                       </span>
                     </div>
                     <div className="rounded-full bg-[var(--gold)]/20 px-4 py-2 text-xs text-[var(--text-primary)]">
-                      Live
+                      {t("statsSection.live")}
                     </div>
                   </div>
                 ))}
@@ -863,7 +1080,7 @@ export default function Home() {
                         ref={(el) => {
                           statValueRefs.current[index] = el;
                         }}
-                        className="block text-2xl font-semibold text-[var(--text-primary)]"
+                        className="relative z-10 block text-2xl font-semibold text-[var(--text-primary)]"
                       >
                         0
                       </span>
@@ -885,11 +1102,10 @@ export default function Home() {
                 {t("sections.hub")}
               </p>
               <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                مجتمع نابض بالحياة
+                {t("hub.title")}
               </h2>
               <p className="max-w-2xl text-sm leading-7 text-muted">
-                نافذة على الأنشطة الثقافية والرياضية والمبادرات المجتمعية التي
-                تصنع هوية الجامعة الحديثة.
+                {t("hub.body")}
               </p>
             </div>
 
@@ -917,7 +1133,7 @@ export default function Home() {
                         >
                           <Image
                             src={currentSlide}
-                            alt={card.title}
+                            alt={t(card.titleKey)}
                             fill
                             className="object-cover"
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 700px"
@@ -933,15 +1149,15 @@ export default function Home() {
                         >
                           <div>
                             <span className="rounded-full bg-[var(--gold)]/20 px-3 py-1 text-[11px] font-semibold text-white">
-                              {card.tag}
+                              {t(card.tagKey)}
                             </span>
                           </div>
                           <div>
                             <h3 className="font-display text-2xl">
-                              {card.title}
+                              {t(card.titleKey)}
                             </h3>
                             <p className="mt-2 text-sm leading-7 text-white/85">
-                              {card.description}
+                              {t(card.descriptionKey)}
                             </p>
                             <div className="mt-4 flex items-center gap-3">
                               <button
@@ -953,9 +1169,9 @@ export default function Home() {
                                       card.images!.length
                                   )
                                 }
-                                className="rounded-full border border-white/40 px-3 py-1 text-xs"
+                                className="min-h-[44px] rounded-full border border-white/40 px-4 py-2 text-xs"
                               >
-                                السابق
+                                {t("carousel.prev")}
                               </button>
                               <button
                                 type="button"
@@ -964,9 +1180,9 @@ export default function Home() {
                                     (prev) => (prev + 1) % card.images!.length
                                   )
                                 }
-                                className="rounded-full border border-white/40 px-3 py-1 text-xs"
+                                className="min-h-[44px] rounded-full border border-white/40 px-4 py-2 text-xs"
                               >
-                                التالي
+                                {t("carousel.next")}
                               </button>
                             </div>
                           </div>
@@ -988,7 +1204,7 @@ export default function Home() {
                       {card.image ? (
                         <Image
                           src={card.image}
-                          alt={card.title}
+                          alt={t(card.titleKey)}
                           fill
                           className="object-cover"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px"
@@ -999,10 +1215,10 @@ export default function Home() {
                       <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.55),_rgba(0,31,63,0.1),_rgba(0,31,63,0.65))]" />
                       <div className="absolute bottom-4 right-4 left-4 text-white">
                         <span className="rounded-full bg-[var(--gold)]/25 px-3 py-1 text-[11px] font-semibold">
-                          {card.tag}
+                          {t(card.tagKey)}
                         </span>
                         <h3 className="mt-3 font-display text-xl">
-                          {card.title}
+                          {t(card.titleKey)}
                         </h3>
                       </div>
                       <motion.div
@@ -1011,11 +1227,11 @@ export default function Home() {
                         className="absolute inset-0 flex flex-col justify-end bg-[rgba(0,31,63,0.86)] p-5 text-white"
                       >
                         <p className="text-sm leading-7 text-white/90">
-                          {card.description}
+                          {t(card.descriptionKey)}
                         </p>
-                        {card.date ? (
+                        {card.dateKey ? (
                           <span className="mt-3 text-[11px] uppercase tracking-[0.2em] text-[var(--gold)]">
-                            {card.date}
+                            {t(card.dateKey)}
                           </span>
                         ) : null}
                       </motion.div>
@@ -1033,19 +1249,32 @@ export default function Home() {
                 {t("sections.admissions")}
               </p>
               <h2 className="mt-3 font-display text-2xl text-[var(--text-primary)] sm:text-3xl">
-                بوابة القبول الذكية
+                {t("admissions.title")}
               </h2>
               <p className="mt-4 text-sm leading-7 text-muted">
-                نموذج تقديم تفاعلي متعدد الخطوات يحاكي تجربة الجامعات البريطانية.
+                {t("admissions.body")}
               </p>
 
-              <div className="mt-6 space-y-3">
+              <div
+                className="mt-6 space-y-3"
+                role="tablist"
+                aria-label={t("admissions.tabsLabel")}
+              >
                 {admissionSteps.map((step, index) => {
                   const isActive = index === stepIndex;
                   return (
-                    <div
+                    <motion.button
                       key={step.id}
-                      className="surface-card relative overflow-hidden rounded-2xl p-4"
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls={`admission-panel-${step.id}`}
+                      onClick={() => setStepIndex(index)}
+                      className={`surface-card relative w-full overflow-hidden rounded-2xl p-4 text-start transition ${
+                        isActive
+                          ? "glow-gold ring-1 ring-[var(--gold)]/40"
+                          : ""
+                      }`}
                     >
                       {isActive ? (
                         <motion.span
@@ -1056,15 +1285,17 @@ export default function Home() {
                       <div className="relative z-10 flex items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold text-[var(--text-primary)]">
-                            {step.title}
+                            {t(step.titleKey)}
                           </p>
-                          <p className="text-xs text-muted">{step.description}</p>
+                          <p className="text-xs text-muted">
+                            {t(step.descriptionKey)}
+                          </p>
                         </div>
                         <span className="text-xs font-semibold text-[var(--gold)]">
                           0{index + 1}
                         </span>
                       </div>
-                    </div>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -1072,62 +1303,91 @@ export default function Home() {
 
             <div className="glass-card rounded-[28px] p-8 sm:p-10">
               <h3 className="font-display text-xl text-[var(--text-primary)] sm:text-2xl">
-                نموذج التقديم التفاعلي
+                {t("admissions.formTitle")}
               </h3>
               <p className="mt-3 text-sm text-muted">
-                الخطوة {stepIndex + 1} من {admissionSteps.length}
+                {t("admissions.stepLabel")} {stepIndex + 1} {t("admissions.of")}{" "}
+                {admissionSteps.length}
               </p>
 
               <div className="mt-6 space-y-4">
-                {stepIndex === 0 ? (
-                  <div className="grid gap-4">
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="الاسم الكامل"
-                    />
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="البريد الإلكتروني"
-                    />
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="رقم الهاتف"
-                    />
-                  </div>
-                ) : null}
+                <AnimatePresence mode="wait">
+                  {stepIndex === 0 ? (
+                    <motion.div
+                      key="profile"
+                      id="admission-panel-profile"
+                      role="tabpanel"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.35 }}
+                      className="grid gap-4"
+                    >
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.fullName")}
+                      />
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.email")}
+                      />
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.phone")}
+                      />
+                    </motion.div>
+                  ) : null}
 
-                {stepIndex === 1 ? (
-                  <div className="grid gap-4">
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="البرنامج المطلوب"
-                    />
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="الشعبة"
-                    />
-                    <input
-                      className="input-surface rounded-2xl px-4 py-3 text-sm"
-                      placeholder="المستوى الدراسي"
-                    />
-                  </div>
-                ) : null}
+                  {stepIndex === 1 ? (
+                    <motion.div
+                      key="academic"
+                      id="admission-panel-academic"
+                      role="tabpanel"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.35 }}
+                      className="grid gap-4"
+                    >
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.program")}
+                      />
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.track")}
+                      />
+                      <input
+                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
+                        placeholder={t("admissions.fields.level")}
+                      />
+                    </motion.div>
+                  ) : null}
 
-                {stepIndex === 2 ? (
-                  <div className="rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]">
-                    بالضغط على إرسال، سيتم تحويل الطلب إلى بوابة القبول الذكية
-                    مع إشعار فوري عبر البريد الإلكتروني.
-                  </div>
-                ) : null}
+                  {stepIndex === 2 ? (
+                    <motion.div
+                      key="review"
+                      id="admission-panel-review"
+                      role="tabpanel"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.35 }}
+                      className="rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]"
+                    >
+                      {t("admissions.reviewNotice")}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
-                  className="rounded-full border border-[var(--gold)]/30 px-5 py-2 text-xs font-semibold text-[var(--text-primary)]"
+                  className="min-h-[44px] rounded-full border border-[var(--gold)]/30 px-5 py-2 text-xs font-semibold text-[var(--text-primary)]"
                 >
-                  السابق
+                  {t("admissions.prev")}
                 </button>
                 <button
                   type="button"
@@ -1136,54 +1396,27 @@ export default function Home() {
                       Math.min(prev + 1, admissionSteps.length - 1)
                     )
                   }
-                  className="rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-white glow-gold"
+                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-white glow-gold"
                 >
-                  التالي
+                  {t("admissions.next")}
                 </button>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="map" className="section-lazy py-16 md:py-20">
-          <div ref={mapSectionRef} className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="flex flex-col gap-3">
+        <section id="location" className="section-lazy py-16 md:py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="glass-card flex flex-col gap-4 rounded-[32px] p-6 sm:p-8">
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
-                {t("sections.map")}
+                {t("sections.location")}
               </p>
-              <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                الخريطة التفاعلية
+              <h2 className="font-display text-2xl text-[var(--text-primary)] sm:text-3xl">
+                {t("location.title")}
               </h2>
-              <p className="max-w-2xl text-sm leading-7 text-muted">
-                موقع الجامعة في زاوية الدهماني بواجهة داكنة أنيقة.
+              <p className="text-sm leading-7 text-muted">
+                {t("location.body")}
               </p>
-            </div>
-
-            <div className="glass-card mt-8 rounded-[32px] p-4 sm:p-6">
-              <div className="overflow-hidden rounded-3xl">
-                {isMapReady ? (
-                  <iframe
-                    title="Al-Hadhra University Location"
-                    src="https://maps.google.com/maps?q=Tripoli%20Dahmani&t=m&z=13&output=embed"
-                    className="h-80 w-full border-0"
-                    loading="lazy"
-                    style={{
-                      filter:
-                        theme === "dark"
-                          ? "grayscale(0.3) invert(0.9) hue-rotate(180deg)"
-                          : "grayscale(0.15)",
-                    }}
-                  />
-                ) : (
-                  <div className="flex h-80 w-full items-center justify-center bg-[rgba(197,160,89,0.08)] text-sm text-muted">
-                    يتم تحميل الخريطة عند الاقتراب من القسم
-                  </div>
-                )}
-              </div>
-              <div className="mt-4 flex items-center gap-3 text-sm text-muted">
-                <MapPin className="h-4 w-4 text-[var(--gold)]" />
-                زاوية الدهماني، طرابلس
-              </div>
             </div>
           </div>
         </section>
@@ -1193,21 +1426,22 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 text-xs text-muted sm:px-6 sm:text-sm md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <span className="block text-[var(--text-primary)]">
-              جامعة الحاضرة © 2026
+              {t("footer.copyright")}
             </span>
+            <div className="text-xs text-muted">{t("footer.location")}</div>
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-[var(--gold)]" />
-              <span>0213400875 - 0927700733</span>
+              <span>{t("footer.phone")}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-[var(--gold)]" />
-              <span>info@alhadhra.edu.ly</span>
+              <span>{t("footer.email")}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <a
-              className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
+              className="glow-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--gold)]/40 text-[var(--text-primary)]"
               href="https://facebook.com"
               aria-label="Facebook"
               target="_blank"
@@ -1216,7 +1450,7 @@ export default function Home() {
               <Facebook className="h-4 w-4" />
             </a>
             <a
-              className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
+              className="glow-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--gold)]/40 text-[var(--text-primary)]"
               href="https://instagram.com"
               aria-label="Instagram"
               target="_blank"
@@ -1225,7 +1459,7 @@ export default function Home() {
               <Instagram className="h-4 w-4" />
             </a>
             <a
-              className="glow-hover rounded-full border border-[var(--gold)]/40 p-2 text-[var(--text-primary)]"
+              className="glow-hover flex h-11 w-11 items-center justify-center rounded-full border border-[var(--gold)]/40 text-[var(--text-primary)]"
               href="https://youtube.com"
               aria-label="YouTube"
               target="_blank"
