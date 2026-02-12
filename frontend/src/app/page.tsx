@@ -556,16 +556,27 @@ export default function Home() {
               className="glass-card rounded-[28px] p-8 sm:p-10"
             >
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
-                كلمة رئيس الجامعة
+                كلمة وكيل الجامعة
               </p>
               <blockquote className="mt-5 border-s-4 border-[var(--gold)] ps-5 text-lg leading-8 text-[var(--text-primary)] sm:text-xl">
                 جامعة الحاضرة ليست مجرد صرح تعليمي، بل هي منارة لبناء الإنسان
                 ونهضة الوطن عبر التكنولوجيا والابتكار.
               </blockquote>
               <div className="mt-6 flex items-center gap-4">
+                <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
+                  <Image
+                    src="/images/vice_chancellor.webp"
+                    alt="صورة وكيل الجامعة"
+                    width={56}
+                    height={56}
+                    loading="lazy"
+                    sizes="56px"
+                    quality={70}
+                  />
+                </div>
                 <Image
                   src="/images/signature.webp"
-                  alt="توقيع رئيس الجامعة"
+                  alt="توقيع وكيل الجامعة"
                   width={140}
                   height={48}
                   loading="lazy"
@@ -576,7 +587,7 @@ export default function Home() {
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
                     أ. عبد الرؤوف أبو جراد
                   </p>
-                  <p className="text-xs text-muted">رئيس جامعة الحاضرة</p>
+                  <p className="text-xs text-muted">وكيل جامعة الحاضرة</p>
                 </div>
               </div>
             </motion.div>
