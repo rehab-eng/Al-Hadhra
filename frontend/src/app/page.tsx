@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -398,7 +398,7 @@ export default function Home() {
       statValueRefs.current.forEach((el, index) => {
         if (!el) return;
         const current = el.textContent?.trim() ?? "";
-        if (current === "0" || current === "٠") {
+        if (current === "0" || current === "?") {
           el.textContent = stats[index].value.toLocaleString(numberLocale);
         }
       });
@@ -781,7 +781,7 @@ export default function Home() {
               <div className="mt-6 flex items-center gap-4">
                 <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
                   <Image
-                    src="/images/vice_chancellor.webp"
+                    src="/images/vice_chancellor_v2.webp"
                     alt={t("leadership.photoAlt")}
                     width={56}
                     height={56}
@@ -986,7 +986,7 @@ export default function Home() {
 
                   <div className="mt-5 space-y-3 text-sm text-muted">
                     {program.highlights.map((item) => (
-                      <p key={item}>• {item}</p>
+                      <p key={item}>� {item}</p>
                     ))}
                   </div>
 
@@ -1473,3 +1473,4 @@ export default function Home() {
     </div>
   );
 }
+
