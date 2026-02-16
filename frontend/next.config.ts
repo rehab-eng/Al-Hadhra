@@ -3,7 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
-  swcMinify: true,
+  turbopack: {
+    root: __dirname,
+  },
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ["lucide-react"],

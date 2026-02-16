@@ -423,7 +423,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return (
+  return (
     <div
       ref={rootRef}
       className="relative min-h-screen overflow-x-hidden text-[var(--text-primary)]"
@@ -841,7 +841,7 @@ export default function Home() {
               </div>
             </motion.div>
           </div>
-        </section>
+        </section>
         <section id="academics" className="section-lazy py-16 md:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <div className="flex flex-col gap-3">
@@ -986,7 +986,7 @@ export default function Home() {
 
                   <div className="mt-5 space-y-3 text-sm text-muted">
                     {program.highlights.map((item) => (
-                      <p key={item}>• {item}</p>
+                      <p key={item}> {item}</p>
                     ))}
                   </div>
 
@@ -1008,7 +1008,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section>
         <section
           id="stats"
           ref={statsSectionRef}
@@ -1241,7 +1241,7 @@ export default function Home() {
               })}
             </div>
           </div>
-        </section>
+        </section>
         <section id="admissions" className="section-lazy py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="glass-card rounded-[28px] p-8 sm:p-10">
@@ -1472,5 +1472,5 @@ export default function Home() {
       </footer>
     </div>
   );
-}
-
+}
+
