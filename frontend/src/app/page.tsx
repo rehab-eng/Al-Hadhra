@@ -186,6 +186,7 @@ export default function Home() {
   const heroImageRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLDivElement | null>(null);
   const statsSectionRef = useRef<HTMLElement | null>(null);
+  const detailsRef = useRef<HTMLDivElement | null>(null);
   const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const statValueRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [activeFolderId, setActiveFolderId] = useState(academicFolders[0].id);
@@ -196,6 +197,8 @@ export default function Home() {
   const [language, setLanguage] = useState(i18next.language || "ar");
   const [theme, setTheme] = useState("light");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const activeFolder = useMemo(
     () => academicFolders.find((folder) => folder.id === activeFolderId),
@@ -208,6 +211,22 @@ export default function Home() {
   );
 
   const numberLocale = language === "ar" ? "ar-LY" : "en-US";
+
+  const folderProgramsMap: Record<string, string[]> = useMemo(
+    () => ({
+      languages: ["english"],
+      law: ["law"],
+      business: ["business"],
+      technology: ["computer-science"],
+      arts: []
+    }),
+    []
+  );
+
+  const activeProgramIds = folderProgramsMap[activeFolderId] ?? [];
+  const activePrograms = (programsData as Program[]).filter((program) =>
+    activeProgramIds.includes(program.id)
+  );
 
   const overlayVariants = useMemo(
     () => ({
@@ -273,6 +292,24 @@ export default function Home() {
     media.addListener(update);
     return () => media.removeListener(update);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(media.matches);
+    update();
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    statValueRefs.current = [];
+    bubbleRefs.current = [];
+  }, [isMobile]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -391,20 +428,50 @@ export default function Home() {
       observer.disconnect();
       context?.revert();
     };
-  }, [numberLocale]);
+  }, [numberLocale, isMobile]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       statValueRefs.current.forEach((el, index) => {
         if (!el) return;
         const current = el.textContent?.trim() ?? "";
-        if (current === "0" || current === "?") {
+        if (current === "0" || current === "٠" || current === "?") {
           el.textContent = stats[index].value.toLocaleString(numberLocale);
         }
       });
     }, 1200);
     return () => clearTimeout(timeout);
-  }, [numberLocale]);
+  }, [numberLocale, isMobile]);
+
+  useEffect(() => {
+    if (!detailsOpen || !detailsRef.current) return;
+    detailsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [detailsOpen, activeFolderId]);
+
+  useEffect(() => {
+    if (!detailsOpen || !detailsRef.current) return;
+    const items = Array.from(
+      detailsRef.current.querySelectorAll<HTMLElement>("[data-count]")
+    );
+    if (!items.length) return;
+    const duration = 700;
+    items.forEach((item) => {
+      const raw = item.dataset.count ?? "0";
+      const target = Number.parseInt(raw, 10);
+      if (!Number.isFinite(target) || target <= 0) return;
+      const start = performance.now();
+      const step = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const value = Math.max(1, Math.round(target * progress));
+        item.textContent = value.toLocaleString(numberLocale);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+      item.textContent = "1";
+      requestAnimationFrame(step);
+    });
+  }, [detailsOpen, activeFolderId, numberLocale]);
 
   useEffect(() => {
     let lastScroll = window.scrollY;
@@ -480,9 +547,6 @@ export default function Home() {
                 </a>
                 <a className="hover:text-[var(--gold)]" href="#academics">
                   {t("nav.academics")}
-                </a>
-                <a className="hover:text-[var(--gold)]" href="#programs">
-                  {t("nav.programs")}
                 </a>
                 <a className="hover:text-[var(--gold)]" href="#hub">
                   {t("nav.hub")}
@@ -614,7 +678,6 @@ export default function Home() {
                 {[
                   { href: "#home", label: t("nav.home") },
                   { href: "#academics", label: t("nav.academics") },
-                  { href: "#programs", label: t("nav.programs") },
                   { href: "#hub", label: t("nav.hub") },
                   { href: "#admissions", label: t("nav.admissions") },
                   { href: "#location", label: t("nav.location") },
@@ -739,7 +802,7 @@ export default function Home() {
                       {t("cta.apply")}
                     </a>
                     <a
-                      href="#programs"
+                      href="#academics"
                       className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/50 px-6 py-3 text-xs font-semibold text-white hover:border-[var(--gold)] sm:text-sm"
                     >
                       {t("cta.explore")}
@@ -864,7 +927,14 @@ export default function Home() {
                     <motion.button
                       key={folder.id}
                       whileHover={{ y: -4 }}
-                      onClick={() => setActiveFolderId(folder.id)}
+                      onClick={() => {
+                        setActiveFolderId(folder.id);
+                        setDetailsOpen((prev) =>
+                          folder.id === activeFolderId ? !prev : true
+                        );
+                      }}
+                      aria-expanded={detailsOpen && folder.id === activeFolderId}
+                      aria-controls="academic-details"
                       className="relative overflow-hidden rounded-3xl text-start"
                     >
                       {isActive ? (
@@ -927,88 +997,113 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+          <AnimatePresence>
+            {detailsOpen ? (
+              <motion.div
+                id="academic-details"
+                ref={detailsRef}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.35 }}
+                className="mt-10 glass-card rounded-[32px] p-6 sm:p-8"
+              >
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
+                    {t("sections.programs")}
+                  </p>
+                  <h3 className="font-display text-2xl text-[var(--text-primary)] sm:text-3xl">
+                    {t("programs.title")}
+                  </h3>
+                  <p className="text-sm text-muted">{t("programs.body")}</p>
+                </div>
 
-        <section id="programs" className="section-lazy py-16 md:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
-                {t("sections.programs")}
-              </p>
-              <h2 className="font-display text-3xl text-[var(--text-primary)] sm:text-4xl">
-                {t("programs.title")}
-              </h2>
-              <p className="max-w-2xl text-sm leading-7 text-muted">
-                {t("programs.body")}
-              </p>
-            </div>
-
-            <div className="mt-8 grid gap-6 lg:grid-cols-2">
-              {(programsData as Program[]).map((program) => (
-                <motion.article
-                  key={program.id}
-                  layoutId={`program-${program.id}`}
-                  className="glass-card rounded-[32px] p-6 sm:p-8"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <h3 className="font-display text-2xl text-[var(--text-primary)]">
-                      {program.title}
-                    </h3>
-                    {program.coordinator ? (
-                      <span className="rounded-full border border-[var(--gold)]/40 px-3 py-1 text-xs text-muted">
-                        {t("programs.coordinator")}: {program.coordinator}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs">
-                    <div className="surface-card rounded-2xl px-3 py-4">
-                      <span className="block text-lg font-semibold text-[var(--text-primary)]">
-                        {program.stats.courses}
-                      </span>
-                      <span className="text-muted">{t("programs.courses")}</span>
-                    </div>
-                    <div className="surface-card rounded-2xl px-3 py-4">
-                      <span className="block text-lg font-semibold text-[var(--text-primary)]">
-                        {program.stats.credits}
-                      </span>
-                      <span className="text-muted">{t("programs.credits")}</span>
-                    </div>
-                    <div className="surface-card rounded-2xl px-3 py-4">
-                      <span className="block text-lg font-semibold text-[var(--text-primary)]">
-                        {program.stats.semesters}
-                      </span>
-                      <span className="text-muted">
-                        {t("programs.semesters")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 space-y-3 text-sm text-muted">
-                    {program.highlights.map((item) => (
-                      <p key={item}> {item}</p>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]">
-                    {program.tuition}
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {program.careers.map((career) => (
-                      <span
-                        key={career}
-                        className="rounded-full border border-[var(--gold)]/40 px-3 py-1 text-xs text-[var(--text-primary)]"
+                {activePrograms.length ? (
+                  <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                    {activePrograms.map((program) => (
+                      <article
+                        key={program.id}
+                        className="surface-card rounded-[28px] p-5 sm:p-6"
                       >
-                        {career}
-                      </span>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <h4 className="font-display text-xl text-[var(--text-primary)]">
+                            {program.title}
+                          </h4>
+                          {program.coordinator ? (
+                            <span className="rounded-full border border-[var(--gold)]/40 px-3 py-1 text-[11px] text-muted">
+                              {t("programs.coordinator")}: {program.coordinator}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
+                          <div className="glass-card rounded-2xl px-3 py-4">
+                            <span
+                              data-count={program.stats.courses}
+                              className="block text-lg font-semibold text-[var(--text-primary)]"
+                            >
+                              0
+                            </span>
+                            <span className="text-muted">
+                              {t("programs.courses")}
+                            </span>
+                          </div>
+                          <div className="glass-card rounded-2xl px-3 py-4">
+                            <span
+                              data-count={program.stats.credits}
+                              className="block text-lg font-semibold text-[var(--text-primary)]"
+                            >
+                              0
+                            </span>
+                            <span className="text-muted">
+                              {t("programs.credits")}
+                            </span>
+                          </div>
+                          <div className="glass-card rounded-2xl px-3 py-4">
+                            <span
+                              data-count={program.stats.semesters}
+                              className="block text-lg font-semibold text-[var(--text-primary)]"
+                            >
+                              0
+                            </span>
+                            <span className="text-muted">
+                              {t("programs.semesters")}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 space-y-3 text-sm text-muted">
+                          {program.highlights.map((item) => (
+                            <p key={item}>• {item}</p>
+                          ))}
+                        </div>
+
+                        <div className="mt-4 rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]">
+                          {program.tuition}
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {program.careers.map((career) => (
+                            <span
+                              key={career}
+                              className="rounded-full border border-[var(--gold)]/40 px-3 py-1 text-xs text-[var(--text-primary)]"
+                            >
+                              {career}
+                            </span>
+                          ))}
+                        </div>
+                      </article>
                     ))}
                   </div>
-                </motion.article>
-              ))}
-            </div>
-          </div>
-        </section>
+                ) : (
+                  <div className="mt-6 rounded-3xl border border-[var(--gold)]/25 bg-[rgba(197,160,89,0.12)] p-6 text-sm text-[var(--text-primary)]">
+                    {t("academics.comingSoon")}
+                  </div>
+                )}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </section>
         <section
           id="stats"
           ref={statsSectionRef}
@@ -1040,7 +1135,9 @@ export default function Home() {
                       </p>
                       <span
                         ref={(el) => {
-                          statValueRefs.current[index] = el;
+                          if (isMobile) {
+                            statValueRefs.current[index] = el;
+                          }
                         }}
                         className="relative z-10 mt-2 block text-2xl font-semibold text-[var(--text-primary)]"
                       >
@@ -1066,7 +1163,9 @@ export default function Home() {
                     <div
                       key={stat.id}
                       ref={(el) => {
-                        bubbleRefs.current[index] = el;
+                        if (!isMobile) {
+                          bubbleRefs.current[index] = el;
+                        }
                       }}
                       className={`bubble absolute flex flex-col items-center justify-center rounded-full text-center ${sizeClass}`}
                       style={{
@@ -1078,7 +1177,9 @@ export default function Home() {
                     >
                       <span
                         ref={(el) => {
-                          statValueRefs.current[index] = el;
+                          if (!isMobile) {
+                            statValueRefs.current[index] = el;
+                          }
                         }}
                         className="relative z-10 block text-2xl font-semibold text-[var(--text-primary)]"
                       >
