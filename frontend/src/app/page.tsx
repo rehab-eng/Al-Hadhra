@@ -620,7 +620,7 @@ export default function Home() {
                     height={28}
                     loading="lazy"
                     sizes="28px"
-                    quality={80}
+                    quality={45}
                   />
                 </div>
                 <div className="text-center">
@@ -669,7 +669,7 @@ export default function Home() {
                     height={32}
                     loading="lazy"
                     sizes="32px"
-                    quality={80}
+                    quality={45}
                   />
                   </div>
                   <div className="text-center">
@@ -755,7 +755,7 @@ export default function Home() {
                     height={28}
                     loading="lazy"
                     sizes="28px"
-                    quality={80}
+                    quality={45}
                   />
                   </div>
                   <div>
@@ -865,15 +865,13 @@ export default function Home() {
                 ref={heroImageRef}
                 className="absolute inset-0 will-change-transform"
               >
-                <Image
+                <img
                   src="/images/campus.webp"
                   alt={t("hero.imageAlt")}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 1100px"
-                  priority
+                  className="h-full w-full object-cover"
                   fetchPriority="high"
-                  quality={60}
+                  decoding="async"
+                  loading="eager"
                 />
               </div>
               <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.86),_rgba(0,31,63,0.35),_rgba(0,31,63,0.92))]" />
@@ -948,7 +946,7 @@ export default function Home() {
                     height={56}
                     loading="lazy"
                     sizes="56px"
-                    quality={70}
+                    quality={50}
                   />
                   </div>
                 <div>
