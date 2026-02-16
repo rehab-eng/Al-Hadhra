@@ -853,15 +853,6 @@ export default function Home() {
                     quality={70}
                   />
                 </div>
-                <Image
-                  src="/images/signature.webp"
-                  alt={t("leadership.signatureAlt")}
-                  width={140}
-                  height={48}
-                  loading="lazy"
-                  sizes="140px"
-                  quality={80}
-                />
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
                     {t("leadership.name")}
