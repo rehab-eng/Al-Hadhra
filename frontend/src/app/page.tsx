@@ -193,7 +193,25 @@ export default function Home() {
   const [footballIndex, setFootballIndex] = useState(0);
   const [canHover, setCanHover] = useState(true);
   const [navHidden, setNavHidden] = useState(false);
+  const [navCompact, setNavCompact] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    nationalId: "",
+    departmentRequested: "",
+    studyType: "",
+    sendToUniversityEmail: true,
+    sendToStudentEmail: true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submission, setSubmission] = useState<{
+    applicationCode: string;
+    fileName: string;
+    documentBase64: string;
+    submittedAt: string;
+  } | null>(null);
   const [language, setLanguage] = useState(i18next.language || "ar");
   const [theme, setTheme] = useState("light");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -237,6 +255,77 @@ export default function Home() {
   );
 
   const t = useMemo(() => (key: string) => i18next.t(key), [language]);
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+  const handleAdmissionChange = (
+    field: keyof typeof formData,
+    value: string | boolean
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const profileComplete =
+    formData.fullName.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    formData.nationalId.trim() !== "";
+  const academicComplete =
+    formData.departmentRequested.trim() !== "" &&
+    formData.studyType.trim() !== "";
+
+  const handleAdmissionSubmit = async () => {
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${apiBase}/admissions/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          nationalId: formData.nationalId,
+          departmentRequested: formData.departmentRequested,
+          studyType: formData.studyType,
+          sendToUniversityEmail: formData.sendToUniversityEmail,
+          sendToStudentEmail: formData.sendToStudentEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message || "Submission failed.");
+      }
+
+      const payload = await response.json();
+      setSubmission({
+        applicationCode: payload.applicationCode,
+        fileName: payload.fileName,
+        documentBase64: payload.documentBase64,
+        submittedAt: payload.submittedAt,
+      });
+    } catch (error: any) {
+      setSubmitError(error?.message || t("admissions.submitError"));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!submission?.documentBase64) return;
+    const binary = atob(submission.documentBase64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = submission.fileName || "admission.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const handleThemeToggle = async () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -478,6 +567,7 @@ export default function Home() {
     const handleScroll = () => {
       const current = window.scrollY;
       const delta = current - lastScroll;
+      setNavCompact(current > 80);
       if (delta > 12 && current > 160) {
         setNavHidden(true);
       } else if (delta < -12) {
@@ -505,7 +595,11 @@ export default function Home() {
       >
         <div className="mx-auto max-w-6xl px-4 pt-4 md:px-6">
           <div className="md:hidden">
-            <div className="surface-card flex items-center justify-between rounded-[24px] px-4 py-3 backdrop-blur-md">
+            <div
+              className={`nav-shell flex items-center justify-between rounded-[24px] px-4 transition-all duration-300 ${
+                navCompact ? "py-2" : "py-3"
+              }`}
+            >
               <button
                 type="button"
                 aria-label={t("nav.menu")}
@@ -540,82 +634,88 @@ export default function Home() {
           </div>
 
           <div className="hidden md:block">
-            <div className="surface-card flex flex-col items-center gap-4 rounded-[28px] px-4 py-4 backdrop-blur-md md:flex-row md:justify-between md:px-6">
-              <nav className="flex flex-wrap items-center justify-center gap-4 text-xs font-medium sm:text-sm md:justify-start">
-                <a className="hover:text-[var(--gold)]" href="#home">
-                  {t("nav.home")}
-                </a>
-                <a className="hover:text-[var(--gold)]" href="#academics">
-                  {t("nav.academics")}
-                </a>
-                <a className="hover:text-[var(--gold)]" href="#hub">
-                  {t("nav.hub")}
-                </a>
-                <a className="hover:text-[var(--gold)]" href="#admissions">
-                  {t("nav.admissions")}
-                </a>
-                <a className="hover:text-[var(--gold)]" href="#location">
-                  {t("nav.location")}
-                </a>
-              </nav>
+            <div
+              className={`nav-shell relative rounded-[32px] px-6 transition-all duration-300 ${
+                navCompact ? "py-3" : "py-4"
+              }`}
+            >
+              <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(circle_at_top,_rgba(197,160,89,0.2),_transparent_55%)]" />
+              <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-[linear-gradient(120deg,_rgba(0,31,63,0.08),_transparent_70%)]" />
 
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
-                  <Image
-                    src="/images/logo.webp"
-                    alt={t("brand.logoAlt")}
-                    width={32}
-                    height={32}
-                    loading="lazy"
-                    sizes="48px"
-                    quality={80}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="font-display text-base sm:text-lg">
-                    {t("brand.name")}
-                  </p>
-                  <p className="text-[11px] text-muted sm:text-xs">
-                    {t("brand.tagline")}
-                  </p>
-                </div>
-              </div>
+              <div className="relative grid items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
+                <nav className="flex flex-wrap items-center gap-5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-primary)]">
+                  <a className="hover:text-[var(--gold)]" href="#home">
+                    {t("nav.home")}
+                  </a>
+                  <a className="hover:text-[var(--gold)]" href="#academics">
+                    {t("nav.academics")}
+                  </a>
+                  <a className="hover:text-[var(--gold)]" href="#hub">
+                    {t("nav.hub")}
+                  </a>
+                  <a className="hover:text-[var(--gold)]" href="#admissions">
+                    {t("nav.admissions")}
+                  </a>
+                </nav>
 
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <label htmlFor="language-select" className="sr-only">
-                  Language
-                </label>
-                <select
-                  id="language-select"
-                  value={language}
-                  onChange={(event) => setLanguage(event.target.value)}
-                  className="input-surface min-h-[44px] rounded-full px-3 py-2 text-xs font-medium text-[var(--text-primary)]"
-                >
-                  {languageOptions.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.label}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={handleThemeToggle}
-                  className="glow-hover min-h-[44px] rounded-full border border-[var(--gold)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-primary)]"
-                >
-                  {theme === "dark" ? t("toggle.light") : t("toggle.dark")}
-                </button>
-                <a
-                  className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
-                  href="#admissions"
-                >
-                  {t("cta.portal")}
-                </a>
-                <a
-                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-medium text-white hover:bg-[#0b2a4a] sm:text-sm glow-gold"
-                  href="#admissions"
-                >
-                  {t("cta.login")}
-                </a>
+                <div className="flex items-center justify-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
+                    <Image
+                      src="/images/logo.webp"
+                      alt={t("brand.logoAlt")}
+                      width={32}
+                      height={32}
+                      loading="lazy"
+                      sizes="48px"
+                      quality={80}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-display text-base sm:text-lg">
+                      {t("brand.name")}
+                    </p>
+                    <p className="text-[11px] text-muted sm:text-xs">
+                      {t("brand.tagline")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-end gap-3">
+                  <label htmlFor="language-select" className="sr-only">
+                    Language
+                  </label>
+                  <select
+                    id="language-select"
+                    value={language}
+                    onChange={(event) => setLanguage(event.target.value)}
+                    className="input-surface min-h-[44px] rounded-full px-3 py-2 text-xs font-medium text-[var(--text-primary)]"
+                  >
+                    {languageOptions.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handleThemeToggle}
+                    className="glow-hover min-h-[44px] rounded-full border border-[var(--gold)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-primary)]"
+                  >
+                    {theme === "dark" ? t("toggle.light") : t("toggle.dark")}
+                  </button>
+                  <a
+                    className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
+                    href="#admissions"
+                  >
+                    {t("cta.portal")}
+                  </a>
+                  <a
+                    className="min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-medium text-white hover:bg-[#0b2a4a] sm:text-sm glow-gold"
+                    href="#admissions"
+                  >
+                    {t("cta.login")}
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -1418,14 +1518,27 @@ export default function Home() {
                       <input
                         className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
                         placeholder={t("admissions.fields.fullName")}
+                        value={formData.fullName}
+                        onChange={(event) =>
+                          handleAdmissionChange("fullName", event.target.value)
+                        }
                       />
                       <input
                         className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
                         placeholder={t("admissions.fields.email")}
+                        type="email"
+                        value={formData.email}
+                        onChange={(event) =>
+                          handleAdmissionChange("email", event.target.value)
+                        }
                       />
                       <input
                         className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
-                        placeholder={t("admissions.fields.phone")}
+                        placeholder={t("admissions.fields.nationalId")}
+                        value={formData.nationalId}
+                        onChange={(event) =>
+                          handleAdmissionChange("nationalId", event.target.value)
+                        }
                       />
                     </motion.div>
                   ) : null}
@@ -1441,18 +1554,58 @@ export default function Home() {
                       transition={{ duration: 0.35 }}
                       className="grid gap-4"
                     >
-                      <input
-                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
-                        placeholder={t("admissions.fields.program")}
-                      />
-                      <input
-                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
-                        placeholder={t("admissions.fields.track")}
-                      />
-                      <input
-                        className="input-surface min-h-[44px] rounded-2xl px-4 py-3 text-sm"
-                        placeholder={t("admissions.fields.level")}
-                      />
+                      <label className="text-xs font-semibold text-muted">
+                        {t("admissions.fields.department")}
+                        <select
+                          className="input-surface mt-2 min-h-[44px] w-full rounded-2xl px-4 py-3 text-sm"
+                          value={formData.departmentRequested}
+                          onChange={(event) =>
+                            handleAdmissionChange(
+                              "departmentRequested",
+                              event.target.value
+                            )
+                          }
+                        >
+                          <option value="">{t("admissions.fields.choose")}</option>
+                          <option value={t("departments.languages")}>
+                            {t("departments.languages")}
+                          </option>
+                          <option value={t("departments.law")}>
+                            {t("departments.law")}
+                          </option>
+                          <option value={t("departments.business")}>
+                            {t("departments.business")}
+                          </option>
+                          <option value={t("departments.art")}>
+                            {t("departments.art")}
+                          </option>
+                          <option value={t("departments.computer")}>
+                            {t("departments.computer")}
+                          </option>
+                          <option value={t("departments.cyber")}>
+                            {t("departments.cyber")}
+                          </option>
+                        </select>
+                      </label>
+
+                      <label className="text-xs font-semibold text-muted">
+                        {t("admissions.fields.studyType")}
+                        <select
+                          className="input-surface mt-2 min-h-[44px] w-full rounded-2xl px-4 py-3 text-sm"
+                          value={formData.studyType}
+                          onChange={(event) =>
+                            handleAdmissionChange("studyType", event.target.value)
+                          }
+                        >
+                          <option value="">{t("admissions.fields.choose")}</option>
+                          <option value={t("admissions.studyTypes.morning")}>
+                            {t("admissions.studyTypes.morning")}
+                          </option>
+                          <option value={t("admissions.studyTypes.evening")}>
+                            {t("admissions.studyTypes.evening")}
+                          </option>
+                        </select>
+                      </label>
                     </motion.div>
                   ) : null}
 
@@ -1465,9 +1618,93 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -12 }}
                       transition={{ duration: 0.35 }}
-                      className="rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]"
+                      className="space-y-4"
                     >
-                      {t("admissions.reviewNotice")}
+                      <div className="rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]">
+                        <p className="font-semibold">{t("admissions.reviewTitle")}</p>
+                        <div className="mt-3 space-y-2 text-xs text-muted">
+                          <div className="flex items-center justify-between">
+                            <span>{t("admissions.fields.fullName")}</span>
+                            <span className="text-[var(--text-primary)]">
+                              {formData.fullName || "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>{t("admissions.fields.nationalId")}</span>
+                            <span className="text-[var(--text-primary)]">
+                              {formData.nationalId || "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>{t("admissions.fields.department")}</span>
+                            <span className="text-[var(--text-primary)]">
+                              {formData.departmentRequested || "-"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>{t("admissions.fields.studyType")}</span>
+                            <span className="text-[var(--text-primary)]">
+                              {formData.studyType || "-"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3 text-xs text-muted">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 accent-[var(--gold)]"
+                            checked={formData.sendToUniversityEmail}
+                            onChange={(event) =>
+                              handleAdmissionChange(
+                                "sendToUniversityEmail",
+                                event.target.checked
+                              )
+                            }
+                          />
+                          {t("admissions.sendToUniversity")}
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 accent-[var(--gold)]"
+                            checked={formData.sendToStudentEmail}
+                            onChange={(event) =>
+                              handleAdmissionChange(
+                                "sendToStudentEmail",
+                                event.target.checked
+                              )
+                            }
+                          />
+                          {t("admissions.sendToStudent")}
+                        </label>
+                      </div>
+
+                      {submitError ? (
+                        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-600">
+                          {submitError}
+                        </div>
+                      ) : null}
+
+                      {submission ? (
+                        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs text-emerald-700">
+                          <p className="font-semibold">
+                            {t("admissions.submitSuccess")}
+                          </p>
+                          <p className="mt-2">
+                            {t("admissions.applicationCode")}:{" "}
+                            <strong>{submission.applicationCode}</strong>
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleDownload}
+                            className="mt-3 min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-white"
+                          >
+                            {t("admissions.downloadDocument")}
+                          </button>
+                        </div>
+                      ) : null}
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
@@ -1477,20 +1714,36 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
+                  disabled={stepIndex === 0}
                   className="min-h-[44px] rounded-full border border-[var(--gold)]/30 px-5 py-2 text-xs font-semibold text-[var(--text-primary)]"
                 >
                   {t("admissions.prev")}
                 </button>
                 <button
                   type="button"
-                  onClick={() =>
-                    setStepIndex((prev) =>
-                      Math.min(prev + 1, admissionSteps.length - 1)
-                    )
+                  onClick={() => {
+                    if (stepIndex < admissionSteps.length - 1) {
+                      setStepIndex((prev) =>
+                        Math.min(prev + 1, admissionSteps.length - 1)
+                      );
+                      return;
+                    }
+                    handleAdmissionSubmit();
+                  }}
+                  disabled={
+                    isSubmitting ||
+                    (stepIndex === 0 && !profileComplete) ||
+                    (stepIndex === 1 && !academicComplete) ||
+                    (stepIndex === admissionSteps.length - 1 &&
+                      (!profileComplete || !academicComplete))
                   }
-                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-white glow-gold"
+                  className="min-h-[44px] rounded-full bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-white glow-gold disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {t("admissions.next")}
+                  {stepIndex === admissionSteps.length - 1
+                    ? isSubmitting
+                      ? t("admissions.submitting")
+                      : t("admissions.submit")
+                    : t("admissions.next")}
                 </button>
               </div>
             </div>

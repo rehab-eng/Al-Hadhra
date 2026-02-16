@@ -179,28 +179,48 @@
     "fields": {
       "fullName": "Full Name",
       "email": "Email Address",
-      "phone": "Phone Number",
-      "program": "Requested Program",
-      "track": "Track",
-      "level": "Academic Level"
+      "nationalId": "National ID",
+      "department": "Selected Department",
+      "studyType": "Study Type",
+      "choose": "Choose from list"
     },
-    "reviewNotice": "By submitting, your application will be routed to the smart admissions portal with an instant email notification.",
+    "studyTypes": {
+      "morning": "Morning",
+      "evening": "Evening"
+    },
+    "reviewTitle": "Review Application",
+    "sendToUniversity": "Send a copy to the university email",
+    "sendToStudent": "Send a confirmation copy to my email",
+    "submit": "Submit Application",
+    "submitting": "Submitting...",
+    "submitSuccess": "Your application has been received.",
+    "downloadDocument": "Download Official Document",
+    "submitError": "Submission failed. Please try again.",
+    "applicationCode": "Document Code",
     "prev": "Previous",
     "next": "Next",
     "steps": {
       "profile": {
         "title": "Basic Profile",
-        "description": "Identity, email, and phone number."
+        "description": "Identity, email, and national ID."
       },
       "academic": {
         "title": "Academic Choice",
-        "description": "Select program, track, and level."
+        "description": "Select department and study type."
       },
       "review": {
         "title": "Final Review",
-        "description": "Review the data and submit."
+        "description": "Review the data and submit the document."
       }
     }
+  },
+  "departments": {
+    "languages": "English Language Program",
+    "law": "Law Program",
+    "business": "Business Administration",
+    "art": "Interior Design",
+    "computer": "Computer Science",
+    "cyber": "Cyber Security"
   },
   "location": {
     "title": "Dahmani Corner, Tripoli",

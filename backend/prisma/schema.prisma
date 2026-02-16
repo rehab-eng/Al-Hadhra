@@ -100,6 +100,9 @@ model AdmissionApplication {
   email               String
   nationalId          String    @unique
   departmentRequested String
+  studyType           String
+  sequence            Int       @unique @default(autoincrement())
+  applicationCode     String?   @unique
   status              AppStatus @default(PENDING)
   submittedAt         DateTime  @default(now())
 
