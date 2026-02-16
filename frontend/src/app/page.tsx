@@ -1171,7 +1171,7 @@ export default function Home() {
                           ))}
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-[var(--gold)]/20 bg-[rgba(197,160,89,0.12)] p-4 text-sm text-[var(--text-primary)]">
+                        <div className="mt-4 rounded-2xl border border-[var(--gold)]/30 bg-white/80 p-4 text-sm font-semibold text-[var(--text-primary)]">
                           {program.tuition}
                         </div>
 
