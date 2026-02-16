@@ -619,7 +619,7 @@ export default function Home() {
                     width={28}
                     height={28}
                     loading="lazy"
-                    sizes="40px"
+                    sizes="(max-width: 768px) 40px, 48px"
                     quality={80}
                   />
                 </div>
@@ -662,15 +662,15 @@ export default function Home() {
 
                 <div className="flex items-center justify-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
-                    <Image
-                      src="/images/logo.webp"
-                      alt={t("brand.logoAlt")}
-                      width={32}
-                      height={32}
-                      loading="lazy"
-                      sizes="48px"
-                      quality={80}
-                    />
+                  <Image
+                    src="/images/logo.webp"
+                    alt={t("brand.logoAlt")}
+                    width={32}
+                    height={32}
+                    loading="lazy"
+                    sizes="(max-width: 768px) 40px, 48px"
+                    quality={80}
+                  />
                   </div>
                   <div className="text-center">
                     <p className="font-display text-base sm:text-lg">
@@ -705,12 +705,12 @@ export default function Home() {
                   >
                     {theme === "dark" ? t("toggle.light") : t("toggle.dark")}
                   </button>
-                  <a
-                    className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
-                    href="#admissions"
-                  >
-                    {t("cta.portal")}
-                  </a>
+                <a
+                  className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--gold)] sm:text-sm"
+                  href="#student-portal"
+                >
+                  {t("cta.portal")}
+                </a>
                   <a
                     className="min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-medium text-white hover:bg-[#0b2a4a] sm:text-sm glow-gold"
                     href="#admissions"
@@ -748,15 +748,15 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/80 gold-ring">
-                    <Image
-                      src="/images/logo.webp"
-                      alt={t("brand.logoAlt")}
-                      width={28}
-                      height={28}
-                      loading="lazy"
-                      sizes="40px"
-                      quality={80}
-                    />
+                  <Image
+                    src="/images/logo.webp"
+                    alt={t("brand.logoAlt")}
+                    width={28}
+                    height={28}
+                    loading="lazy"
+                    sizes="(max-width: 768px) 40px, 48px"
+                    quality={80}
+                  />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-[var(--text-primary)]">
@@ -838,7 +838,7 @@ export default function Home() {
 
               <div className="grid gap-3">
                 <a
-                  href="#admissions"
+                  href="#student-portal"
                   onClick={() => setIsMenuOpen(false)}
                   className="min-h-[44px] rounded-full border border-[var(--brand)]/20 bg-white/80 px-4 py-3 text-center text-sm font-semibold text-[var(--text-primary)]"
                 >
@@ -872,6 +872,7 @@ export default function Home() {
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 85vw, 1100px"
                   priority
+                  fetchPriority="high"
                   quality={60}
                 />
               </div>
@@ -943,18 +944,18 @@ export default function Home() {
               <blockquote className="mt-5 border-s-4 border-[var(--gold)] ps-5 text-lg leading-8 text-[var(--text-primary)] sm:text-xl">
                 {t("leadership.quote")}
               </blockquote>
-              <div className="mt-6 flex items-center gap-4">
-                <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
-                  <Image
-                    src="/images/vice_chancellor_v2.webp"
-                    alt={t("leadership.photoAlt")}
-                    width={56}
-                    height={56}
-                    loading="lazy"
-                    sizes="56px"
-                    quality={70}
-                  />
-                </div>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
+                    <Image
+                      src="/images/vice_chancellor_v2.webp"
+                      alt={t("leadership.photoAlt")}
+                      width={56}
+                      height={56}
+                      loading="lazy"
+                      sizes="(max-width: 768px) 56px, 56px"
+                      quality={70}
+                    />
+                  </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
                     {t("leadership.name")}
@@ -1337,7 +1338,8 @@ export default function Home() {
                         </motion.div>
                         <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.6),_rgba(0,31,63,0.1),_rgba(0,31,63,0.7))]" />
                         <motion.div
-                          variants={overlayVariants}
+                          initial={{ opacity: 1, y: 0 }}
+                          animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.4, ease: "easeOut" }}
                           className="absolute inset-0 flex flex-col justify-between p-6 text-white"
                         >
@@ -1438,7 +1440,10 @@ export default function Home() {
         </section>
         <section id="admissions" className="section-lazy py-16 md:py-20">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="glass-card rounded-[28px] p-8 sm:p-10">
+            <div
+              id="student-portal"
+              className="glass-card rounded-[28px] p-8 sm:p-10"
+            >
               <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
                 {t("sections.admissions")}
               </p>
