@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../common/mail/mail.service';
@@ -10,6 +11,8 @@ import { CreateAdmissionDto } from './dto/create-admission.dto';
 
 @Injectable()
 export class AdmissionsService {
+  private readonly logger = new Logger(AdmissionsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
@@ -48,16 +51,24 @@ export class AdmissionsService {
         return { ...updated, applicationCode };
       });
 
-      const pdfBuffer = await this.pdfService.generateAdmissionPdf({
-        fullName: result.fullName,
-        nationalId: result.nationalId,
-        departmentRequested: result.departmentRequested,
-        studyType: result.studyType,
-        submittedAt: result.submittedAt,
-        applicationCode: result.applicationCode ?? '',
-      });
+      const warnings: string[] = [];
+      let pdfBuffer: Buffer | null = null;
+      let fileName: string | null = null;
 
-      const fileName = `Admission-${result.applicationCode}.pdf`;
+      try {
+        pdfBuffer = await this.pdfService.generateAdmissionPdf({
+          fullName: result.fullName,
+          nationalId: result.nationalId,
+          departmentRequested: result.departmentRequested,
+          studyType: result.studyType,
+          submittedAt: result.submittedAt,
+          applicationCode: result.applicationCode ?? '',
+        });
+        fileName = `Admission-${result.applicationCode}.pdf`;
+      } catch (error) {
+        warnings.push('PDF_GENERATION_FAILED');
+        this.logger.error('PDF generation failed', error as Error);
+      }
 
       const universityEmail =
         process.env.ADMISSIONS_EMAIL || 'info@alhadhra.edu.ly';
@@ -83,41 +94,54 @@ export class AdmissionsService {
         </div>
       `;
 
+      const attachments =
+        pdfBuffer && fileName
+          ? [
+              {
+                filename: fileName,
+                content: pdfBuffer,
+                contentType: 'application/pdf',
+              },
+            ]
+          : undefined;
+
       if (sendToUniversity) {
-        await this.mailService.send({
-          to: universityEmail,
-          subject: `طلب قبول جديد - ${result.applicationCode}`,
-          html: mailHtml,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBuffer,
-              contentType: 'application/pdf',
-            },
-          ],
-        });
+        try {
+          await this.mailService.send({
+            to: universityEmail,
+            subject: `طلب قبول جديد - ${result.applicationCode}`,
+            html: mailHtml,
+            attachments,
+          });
+        } catch (error) {
+          warnings.push('UNIVERSITY_EMAIL_FAILED');
+          this.logger.error('University email failed', error as Error);
+        }
       }
 
       if (sendToStudent) {
-        await this.mailService.send({
-          to: result.email,
-          subject: `تأكيد طلب القبول - ${result.applicationCode}`,
-          html: `
-            <div style="font-family:Tahoma, Arial, sans-serif; direction: rtl;">
-              <h3>تم استلام طلبك بنجاح</h3>
-              <p>نشكر لك تقديم طلب الالتحاق بجامعة الحاضرة.</p>
-              <p>كود الوثيقة الخاصة بك: <strong>${result.applicationCode}</strong></p>
-              <p>مرفق نسخة من الوثيقة الرسمية.</p>
-            </div>
-          `,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBuffer,
-              contentType: 'application/pdf',
-            },
-          ],
-        });
+        try {
+          await this.mailService.send({
+            to: result.email,
+            subject: `تأكيد طلب القبول - ${result.applicationCode}`,
+            html: `
+              <div style="font-family:Tahoma, Arial, sans-serif; direction: rtl;">
+                <h3>تم استلام طلبك بنجاح</h3>
+                <p>نشكر لك تقديم طلب الالتحاق بجامعة الحاضرة.</p>
+                <p>كود الوثيقة الخاصة بك: <strong>${result.applicationCode}</strong></p>
+                <p>${
+                  pdfBuffer
+                    ? 'مرفق نسخة من الوثيقة الرسمية.'
+                    : 'تعذر توليد الوثيقة حالياً وسيتم إرسالها لاحقاً.'
+                }</p>
+              </div>
+            `,
+            attachments,
+          });
+        } catch (error) {
+          warnings.push('STUDENT_EMAIL_FAILED');
+          this.logger.error('Student email failed', error as Error);
+        }
       }
 
       return {
@@ -125,8 +149,9 @@ export class AdmissionsService {
         applicationCode: result.applicationCode,
         submittedAt: result.submittedAt,
         fileName,
-        documentBase64: pdfBuffer.toString('base64'),
-        documentMimeType: 'application/pdf',
+        documentBase64: pdfBuffer ? pdfBuffer.toString('base64') : null,
+        documentMimeType: pdfBuffer ? 'application/pdf' : null,
+        warnings,
       };
     } catch (error: any) {
       if (error?.code === 'P2002') {

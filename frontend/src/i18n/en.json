@@ -195,6 +195,7 @@
     "submitting": "Submitting...",
     "submitSuccess": "Your application has been received.",
     "downloadDocument": "Download Official Document",
+    "pendingDocument": "Your request is saved. The document will be emailed once it is ready.",
     "submitError": "Submission failed. Please try again.",
     "applicationCode": "Document Code",
     "prev": "Previous",

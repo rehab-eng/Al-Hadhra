@@ -208,9 +208,10 @@ export default function Home() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submission, setSubmission] = useState<{
     applicationCode: string;
-    fileName: string;
-    documentBase64: string;
+    fileName: string | null;
+    documentBase64: string | null;
     submittedAt: string;
+    warnings?: string[];
   } | null>(null);
   const [language, setLanguage] = useState(i18next.language || "ar");
   const [theme, setTheme] = useState("light");
@@ -301,6 +302,7 @@ export default function Home() {
         fileName: payload.fileName,
         documentBase64: payload.documentBase64,
         submittedAt: payload.submittedAt,
+        warnings: payload.warnings,
       });
     } catch (error: any) {
       setSubmitError(error?.message || t("admissions.submitError"));
@@ -1696,13 +1698,19 @@ export default function Home() {
                             {t("admissions.applicationCode")}:{" "}
                             <strong>{submission.applicationCode}</strong>
                           </p>
-                          <button
-                            type="button"
-                            onClick={handleDownload}
-                            className="mt-3 min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-white"
-                          >
-                            {t("admissions.downloadDocument")}
-                          </button>
+                          {submission.documentBase64 ? (
+                            <button
+                              type="button"
+                              onClick={handleDownload}
+                              className="mt-3 min-h-[44px] rounded-full bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-white"
+                            >
+                              {t("admissions.downloadDocument")}
+                            </button>
+                          ) : (
+                            <p className="mt-3 text-[11px] text-emerald-700/80">
+                              {t("admissions.pendingDocument")}
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </motion.div>
