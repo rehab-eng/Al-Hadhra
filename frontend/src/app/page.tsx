@@ -619,7 +619,7 @@ export default function Home() {
                     width={28}
                     height={28}
                     loading="lazy"
-                    sizes="(max-width: 768px) 40px, 48px"
+                    sizes="28px"
                     quality={80}
                   />
                 </div>
@@ -668,7 +668,7 @@ export default function Home() {
                     width={32}
                     height={32}
                     loading="lazy"
-                    sizes="(max-width: 768px) 40px, 48px"
+                    sizes="32px"
                     quality={80}
                   />
                   </div>
@@ -754,7 +754,7 @@ export default function Home() {
                     width={28}
                     height={28}
                     loading="lazy"
-                    sizes="(max-width: 768px) 40px, 48px"
+                    sizes="28px"
                     quality={80}
                   />
                   </div>
@@ -879,12 +879,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(0,31,63,0.86),_rgba(0,31,63,0.35),_rgba(0,31,63,0.92))]" />
 
               <div className="relative z-10 px-6 py-16 sm:px-8 md:px-16 md:py-20">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.9, ease: "easeOut" }}
-                  className="max-w-3xl"
-                >
+                <div className="max-w-3xl">
                   <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold)] sm:text-sm">
                     {t("hero.tag")}
                   </p>
@@ -911,7 +906,7 @@ export default function Home() {
                       {t("cta.explore")}
                     </a>
                   </div>
-                </motion.div>
+                </div>
 
                 <div className="mt-10 grid gap-3 text-xs text-white/80 sm:grid-cols-2 sm:text-sm md:grid-cols-3">
                   <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
@@ -946,15 +941,15 @@ export default function Home() {
               </blockquote>
                 <div className="mt-6 flex items-center gap-4">
                   <div className="h-14 w-14 overflow-hidden rounded-full border border-[var(--gold)]/40">
-                    <Image
-                      src="/images/vice_chancellor_v2.webp"
-                      alt={t("leadership.photoAlt")}
-                      width={56}
-                      height={56}
-                      loading="lazy"
-                      sizes="(max-width: 768px) 56px, 56px"
-                      quality={70}
-                    />
+                  <Image
+                    src="/images/vice_chancellor_v2.webp"
+                    alt={t("leadership.photoAlt")}
+                    width={56}
+                    height={56}
+                    loading="lazy"
+                    sizes="56px"
+                    quality={70}
+                  />
                   </div>
                 <div>
                   <p className="text-sm font-semibold text-[var(--text-primary)]">
